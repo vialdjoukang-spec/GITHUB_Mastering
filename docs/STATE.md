@@ -1,9 +1,9 @@
-# État de reprise
-- Objectif : prototype perdu reconstruit sur autorisation explicite ; livraison HTML autonome, audit honnête.
-- Architecture : isomorphic-git + mémoire interne + Buffer, bundlés par esbuild ; quatre leçons ; Issues/PR simulées ; aucun serveur produit.
-- Fichiers : src/, scripts/build.mjs, tests/audit.mjs, ATLAS.html, docs/.
-- Validation : voir AUDIT_FINAL.md et evidence/audit-register.json. Tests navigateur via serveur local puis contexte hors ligne ; file:// bloqué ; Firefox indisponible.
-- Hash HTML : d653fd6e13bf7eaf5f2056a5b3c88a1a6684f6a44ad6e690c72e4aef93748cec.
-- Corrections : normalisation chemins, Buffer, focus défilement, avis non superposé, validation objets SHA-1, avertissement stockage.
-- Ouvert : transfert inédit, couverture clavier/mobile complète, arrêt brutal navigateur, file:// sur deux moteurs.
-- Prochaine tâche : lever les contraintes de test file://, puis compléter les checkpoints et contrôles restants avant extension massive.
+# ATLAS — État de reprise
+
+- **Branche** : `codex/atlas-refondation-pedagogique-20261014` (préversion expérimentale ; `main` inchangé).
+- **Mandat** : `docs/refondation/PLAN_MAITRE.md` ; **avancement** : `docs/refondation/PROGRESS.md`.
+- **Implémentation courante de cette branche** : catalogue hiérarchique des niveaux 0–5 dans `src/curriculum.js` ; 3 leçons pratiques du niveau zéro ; 4 anciennes missions Git du niveau 1 ; lexique interactif de 30 notions dans `src/glossary.js` ; fenêtres natives avec retour du focus ; sauvegarde rétrocompatible ; tests supplémentaires.
+- **Statuts** : N0/N1 partiels ; N2–N5 prévus et explicitement inactifs. Pas d'intégration distante réelle, pas de simulation présentée comme authentique.
+- **Construction** : `npm ci && npm run build && npm test && node tests/local_open.mjs` ; workflow de branche `atlas-local-audit.yml`.
+- **Validation du premier lot** : GitHub Actions [38557184335](https://github.com/vialdjoukang-spec/GITHUB_Mastering/actions/runs/38557184335) = 98/98 tests principaux, puis ouverture directe file:// Chromium 154 et Firefox 157 réussie. Source et HTML synchronisés au commit c5d5ea8. Les changements documentaires ultérieurs n'ajoutent pas de fonctions.
+- **Prochaines tâches** : supprimer toute régression détectée, synchroniser ATLAS.html après réussite de la CI, reprendre l'isolation des exercices, ajouter démonstrations et renforcements pédagogiques.

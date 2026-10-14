@@ -28,6 +28,40 @@ async function run(type, name) {
     assert(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth), 'Débordement mobile');
 
     const op=(n,a)=>page.evaluate(([n,a])=>ATLAS.op(n,a),[n,a]);
+    assert.equal(await page.locator('#pathway .academy-level').count(),6);
+    assert.equal(await page.locator('#pathway [data-foundation]').count(),3);
+    await page.locator('#openGlossary').click();
+    assert(await page.locator('#glossaryDialog').isVisible());
+    await page.locator('#closeGlossary').click();
+    await page.evaluate(()=>ATLAS.selectFoundation('N0-01'));
+    await page.locator('#foundationDemo').click();
+    await page.locator('#saveFile').click();
+    await page.locator('#foundationAnswer').selectOption('local');
+    await page.locator('#foundationVerify').click();
+    await page.waitForFunction(()=>ATLAS.snapshot().meta.foundationBadges.includes('N0-01'));
+    assert((await page.evaluate(()=>ATLAS.foundationChecksFor('N0-01'))).every(x=>x.ok));
+    await page.locator('#experReset').click();
+    for(let i=0;i<3;i++)await page.locator('#experNext').click();
+    let experiment=await page.evaluate(()=>ATLAS.experiment.state());
+    assert.equal(experiment.working,'Version B');
+    assert.equal(experiment.prepared,'Version A');
+    await page.locator('#experVersion').selectOption('a');
+    await page.locator('#experWhy').selectOption('index');
+    await page.locator('#experPredict').click();
+    await page.locator('#experNext').click();
+    await page.waitForFunction(async()=> (await ATLAS.experiment.state()).committed==='Version A');
+    experiment=await page.evaluate(()=>ATLAS.experiment.state());
+    assert.equal(experiment.committed,'Version A');
+    assert.equal(experiment.working,'Version B');
+    // Aucun des gestes de l'expérience n'altère les fichiers du laboratoire principal.
+    assert(!(await page.evaluate(()=>ATLAS.snapshot())).files['/lab/README.md']);
+    await page.evaluate(()=>ATLAS.incident.start('updated'));
+    const incident=await page.evaluate(()=>ATLAS.incident.act('refresh'));
+    assert.equal(incident.attempted,true,'L’opération Git doit avoir été effectuée');
+    assert.equal(incident.result?.accepted,true,'Le résultat du défi doit être confirmé : '+JSON.stringify(incident));
+    assert.equal(incident.committed,'Version B corrigée');
+    assert.deepEqual(incident.committedFiles,['README.md']);
+    assert(!(await page.evaluate(()=>ATLAS.snapshot())).files['/lab/README.md']);
     await page.evaluate(()=>ATLAS.reset());
     await op('write',{path:'README.md',content:'# Mon carnet'});
     await op('write',{path:'transfert.md',content:'Autre contexte'});
@@ -83,7 +117,7 @@ async function run(type, name) {
     assert(width);
     assert.deepEqual(exceptions,[],'Exceptions JavaScript');
     assert(requests.every(u=>u.startsWith('file://')),'Aucune requête réseau');
-    const status={name,version:browser.version(),file_url:url,sha256,theme,git:true,transfer:true,restore:true,report:true,no_network:true,errors:exceptions,passed:true};
+    const status={name,version:browser.version(),file_url:url,sha256,theme,levels:true,glossary:true,foundation:true,experiment:true,incident:true,git:true,transfer:true,restore:true,report:true,no_network:true,errors:exceptions,passed:true};
     results.push(status);
     console.log('PASS file://',name,browser.version());
   } catch(e) {

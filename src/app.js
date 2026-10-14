@@ -1,8 +1,16 @@
 import git from 'isomorphic-git';
 import {MemoryFS} from './fs.js';
+import {CommitExperiment,IncidentChallenge,experimentExplanations} from './experiment.js';
 import {lessons} from './lessons.js';
+import {curriculum,foundationLessons,getFoundation} from './curriculum.js';
+import {glossary,glossaryById,annotateTerms} from './glossary.js';
 const $=id=>document.getElementById(id), dir='/lab', key='atlas-v1';
-let fs=new MemoryFS(), meta={lesson:0,badges:[],actions:[],issues:[],pr:null,explanation:'',transfer:null},busy=false,lastChecks=[],ready=false;
+const experiment=new CommitExperiment();
+let experimentBusy=false;
+const incident=new IncidentChallenge();
+let incidentCounter=0;
+let incidentBusy=false;
+let fs=new MemoryFS(), meta={lesson:0,route:'N0-01',foundationAnswers:{},foundationBadges:[],badges:[],actions:[],issues:[],pr:null,explanation:'',transfer:null},busy=false,lastChecks=[],ready=false;
 const opts=()=>({fs,dir});
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function notify(text,error=false){$('notice').textContent=text;$('notice').classList.toggle('error',error);}
@@ -35,16 +43,265 @@ if(index===1){for(const [p,t] of [['README.md','Mon carnet'],['transfert.md','Au
 if(index===2){add('Branche courante : main',(await git.currentBranch(opts()))==='main');for(const [p,t] of [['README.md','Mon carnet'],['transfert.md','Autre contexte']])add(p+' dans le commit main',(await blobAt('main',p))?.includes(t));add('Aucune modification restante',await clean());}
 if(index===3){let main=null,notes=null,parentContent=null;try{main=await git.resolveRef({...opts(),ref:'main'});notes=await git.resolveRef({...opts(),ref:'notes'});const c=await git.readCommit({...opts(),oid:main});if(c.commit.parent[0])parentContent=await blobAt(c.commit.parent[0],'README.md');}catch{}add('main et notes pointent sur la même évolution',main&&main===notes);add('notes.md contient Une évolution dans le commit',(await blobAt('main','notes.md'))?.includes('Une évolution'));add('Un commit précédent contient le carnet',parentContent?.includes('Mon carnet'));add('Retour sur main et état propre',(await git.currentBranch(opts()))==='main'&&await clean());}
 return checks;}
-async function verify(){lastChecks=await checksFor(meta.lesson);const pass=lastChecks.every(c=>c.ok);if(pass&&!meta.badges.includes(meta.lesson))meta.badges.push(meta.lesson);persist();$('checks').textContent=lastChecks.map(c=>(c.ok?'PASS':'À CORRIGER')+' — '+c.label).join('\n')+'\n'+(pass?'Manipulation vérifiée. Explication à faire relire ; aucune certification d’expertise.':lessons[meta.lesson].error);return pass;}
+async function verify(){const foundation=getFoundation(meta.route);if(foundation){lastChecks=await foundationChecksFor(foundation.id);const pass=lastChecks.every(c=>c.ok);meta.foundationBadges=meta.foundationBadges||[];if(pass&&!meta.foundationBadges.includes(foundation.id))meta.foundationBadges.push(foundation.id);persist();$('checks').textContent=lastChecks.map(c=>(c.ok?'PASS':'À CORRIGER')+' — '+c.label).join('\n')+'\n'+(pass?'Preuve locale vérifiée ; l’explication libre exige une relecture.':foundation.error);return pass;}lastChecks=await checksFor(meta.lesson);const pass=lastChecks.every(c=>c.ok);if(pass&&!meta.badges.includes(meta.lesson))meta.badges.push(meta.lesson);persist();$('checks').textContent=lastChecks.map(c=>(c.ok?'PASS':'À CORRIGER')+' — '+c.label).join('\n')+'\n'+(pass?'Manipulation vérifiée. Explication à faire relire ; aucune certification d’expertise.':lessons[meta.lesson].error);return pass;}
 async function restore(data){if(!data||data.format!=='ATLAS'||data.version!==1||!data.files||typeof data.files!=='object'||Array.isArray(data.files))throw Error('Sauvegarde ATLAS version 1 attendue.');const entries=Object.entries(data.files);if(entries.length>3000)throw Error('Trop de fichiers.');let total=0;for(const [p,b]of entries){if(p!=='/'&&p!=='/lab'&&!/^\/lab\/(?:[A-Za-z0-9_.-]+\/)*[A-Za-z0-9_.-]+$/.test(p)||p.split('/').some(x=>x==='..'||x==='.'||x==='__proto__'||x==='constructor'||x==='prototype'))throw Error('Chemin de sauvegarde interdit.');if(b!==null&&(!Array.isArray(b)||b.some(x=>!Number.isInteger(x)||x<0||x>255)))throw Error('Octets invalides.');total+=b?.length||0;}if(total>5000000)throw Error('Sauvegarde trop volumineuse.');const m=data.meta;if(!m||!Number.isInteger(m.lesson)||m.lesson<0||m.lesson>3||!Array.isArray(m.badges)||m.badges.some(x=>!Number.isInteger(x)||x<0||x>3)||!Array.isArray(m.actions)||m.actions.length>500||!Array.isArray(m.issues)||m.issues.length>100||m.issues.some(x=>!x||typeof x.title!=='string'||x.title.length>200||typeof x.closed!=='boolean')||typeof m.explanation!=='string'||m.explanation.length>20000||m.pr!==null&&(!m.pr||typeof m.pr.source!=='string'||!['open','merged'].includes(m.pr.state)))throw Error('Métadonnées invalides.');if(m.pr)branchOk(m.pr.source);
 const candidate=new MemoryFS(data.files);for(const [p]of entries){if(p==='/')continue;const parent=p.slice(0,p.lastIndexOf('/'))||'/';if(!candidate.entries.has(parent)||candidate.entries.get(parent)!==null)throw Error('Arborescence invalide.');}if(candidate.entries.get('/lab')!==null)throw Error('Dépôt manquant.');const o={fs:candidate,dir};const h=await candidate.readFile('/lab/.git/HEAD','utf8');if(!/^ref: refs\/heads\/[A-Za-z][A-Za-z0-9_-]{0,39}\n?$/.test(h))throw Error('HEAD invalide.');for(const [p,b]of entries){const match=p.match(/^\/lab\/\.git\/objects\/([0-9a-f]{2})\/([0-9a-f]{38})$/);if(match&&b!==null){const oid=match[1]+match[2];const object=await git.readObject({...o,oid,format:'wrapped'});if(object.format!=='wrapped')throw Error('Format objet non pris en charge.');const digest=await crypto.subtle.digest('SHA-1',object.object);const actual=Array.from(new Uint8Array(digest)).map(x=>x.toString(16).padStart(2,'0')).join('');if(actual!==oid)throw Error('Objet Git altéré : identifiant incorrect.');}}const branches=await git.listBranches(o);for(const b of branches){branchOk(b);const history=await git.log({...o,ref:b});for(const c of history){const files=await git.listFiles({...o,ref:c.oid});for(const p of files){pathOk(p);await git.readBlob({...o,oid:c.oid,filepath:p});}}}await git.statusMatrix(o);
 // Only swap after all structural and Git checks succeeded. Imported badges are not trusted.
-fs=candidate;meta={lesson:m.lesson,badges:[],actions:m.actions,issues:m.issues,pr:m.pr,explanation:m.explanation,transfer:null};lastChecks=[];for(let i=0;i<4;i++)if((await checksFor(i)).every(x=>x.ok))meta.badges.push(i);persist();return true;}
-function renderLesson(){const l=lessons[meta.lesson];$('lessonNumber').textContent='MISSION '+String(meta.lesson+1).padStart(2,'0')+' / 04';$('lesson').innerHTML=`<h2 id="lessonTitle">${l.title}</h2><p class="callout"><strong>Objectif mesurable</strong><br>${l.goal}</p><p><strong>Prérequis.</strong> ${l.prereq}</p><h3>Comprendre</h3><p>${l.definition}</p><p>${l.explain}</p><h3>Observer</h3><ol>${l.demo.map(x=>`<li>${x}</li>`).join('')}</ol><button id="demo">Préparer la démonstration dans l’éditeur</button><h3 style="margin-top:20px">Manipuler</h3><p>${l.task}</p><p><strong>Le mécanisme.</strong> ${l.why}</p><details><summary>Erreur fréquente et correction</summary><p>${l.error}</p></details><h3>Expliquer</h3><p>${l.question}</p><details><summary>Voir la réponse expliquée</summary><p>${l.answer}</p></details><h3>Réutiliser</h3><p>${l.transfer}</p>`;$('demo').onclick=()=>{const p=meta.lesson===3?'notes.md':'README.md';$('path').value=p;$('content').value=meta.lesson===3?'Une évolution':'# Mon carnet';$('path').focus();notify('Démonstration préparée : suivez les étapes Observer. Rien n’a été exécuté automatiquement.');};$('lessons').innerHTML=lessons.map((l,i)=>`<button data-lesson="${i}" class="${i===meta.lesson?'active':''}" ${i===meta.lesson?'aria-current="step"':''}>${meta.badges.includes(i)?'✓ ':''}${l.title}</button>`).join('');$('lessons').querySelectorAll('button').forEach(b=>b.onclick=()=>{meta.lesson=Number(b.dataset.lesson);lastChecks=[];$('checks').textContent='Aucune vérification exécutée pour cette mission.';persist();renderLesson();});$('progress').textContent=meta.badges.length+' / 4 manipulations vérifiées';$('score').textContent=String(meta.badges.length).padStart(2,'0')+' / 04';$('bar').style.width=meta.badges.length*25+'%';}
+fs=candidate;const foundationAnswers=Object.fromEntries(Object.entries(m.foundationAnswers&&typeof m.foundationAnswers==='object'&&!Array.isArray(m.foundationAnswers)?m.foundationAnswers:{}).filter(([id,v])=>getFoundation(id)&&typeof v==='string'&&v.length<40));const route=(typeof m.route==='string'&&(getFoundation(m.route)||/^N1-0[1-4]$/.test(m.route)))?m.route:'N0-01';meta={lesson:m.lesson,route,foundationAnswers,foundationBadges:[],badges:[],actions:m.actions,issues:m.issues,pr:m.pr,explanation:m.explanation,transfer:null};lastChecks=[];for(let i=0;i<4;i++)if((await checksFor(i)).every(x=>x.ok))meta.badges.push(i);for(const f of foundationLessons)if((await foundationChecksFor(f.id)).every(x=>x.ok))meta.foundationBadges.push(f.id);/* Les vérifications Git peuvent rafraîchir leur index interne : restituer les octets originaux après contrôle. */fs=new MemoryFS(data.files);persist();return true;}
+
+
+const experimentStepNames=[
+  'Créer README.md avec « Version A »',
+  'Placer A dans l’index Git',
+  'Modifier le fichier en « Version B » sans réindexer',
+  'Créer le premier commit à partir de l’index',
+  'Mettre l’index à jour avec B',
+  'Créer le deuxième commit',
+  'Expérience terminée'
+];
+async function renderExperiment(){
+  const state=await experiment.state();
+  $('experWork').textContent=state.working??'Aucun fichier';
+  $('experStage').textContent=state.prepared??'Rien de préparé';
+  $('experCommit').textContent=state.committed??'Aucun commit';
+  $('experStep').textContent='Étape '+(state.step+1)+' / 7 · '+experimentExplanations[state.step];
+  $('experQuiz').hidden=!state.currentQuestion;
+  $('experNext').disabled=experimentBusy||!state.canAdvance||state.finished;
+  $('experNext').textContent=experimentStepNames[state.step];
+  $('experProof').textContent='Version du dernier commit : '+(state.sha||'aucun')+'\n'+
+    'Historique des opérations isolées :\n'+
+    (state.events.map(e=>e.step+'. '+e.action).join('\n')||'aucune')+'\n\n'+
+    'Matrice Git (fichier, HEAD, travail, index) :\n'+JSON.stringify(state.status);
+  if(state.finished){
+    $('experFeedback').dataset.result='correct';
+    $('experFeedback').textContent='Terminé : le premier commit contient A, le deuxième B. Le dépôt habituel est resté intact.';
+  }
+}
+$('experReset').onclick=async()=>{
+  try{await experiment.reset();$('experVersion').value='';$('experWhy').value='';
+    $('experFeedback').textContent='Nouvelle expérience : votre dépôt habituel n’est pas modifié.';
+    $('experFeedback').dataset.result='';
+    await renderExperiment();
+  }catch(e){notify(e.message,true);}
+};
+$('experNext').onclick=async()=>{
+  if(experimentBusy)return;
+  experimentBusy=true;$('experNext').disabled=true;
+  try{await experiment.next();}
+  catch(e){$('experFeedback').textContent=e.message;$('experFeedback').dataset.result='error';}
+  finally{experimentBusy=false;await renderExperiment();}
+};
+$('experPredict').onclick=async()=>{
+  try{const answer=experiment.predict($('experVersion').value,$('experWhy').value);
+    $('experFeedback').textContent=answer.message;$('experFeedback').dataset.result=answer.ok?'correct':'error';
+    await renderExperiment();
+  }catch(e){$('experFeedback').textContent=e.message;$('experFeedback').dataset.result='error';}
+};
+
+
+async function renderIncident(){
+  const x=await incident.state();
+  $('incidentKeep').disabled=incidentBusy||!x.mode||x.attempted;
+  $('incidentRefresh').disabled=incidentBusy||!x.mode||x.attempted;
+  $('incidentRepeat').disabled=incidentBusy||!x.mode;
+  $('incidentWork').textContent=x.working??'—';
+  $('incidentStage').textContent=x.prepared??'—';
+  $('incidentCommit').textContent=x.committed??'Pas de commit';
+  if(!x.mode){
+    $('incidentGoal').textContent='Lancez un défi pour découvrir l’objectif.';
+    $('incidentFeedback').textContent='Aucune opération exécutée.';
+    $('incidentProof').textContent='Aucune mission active.';
+    return;
+  }
+  $('incidentGoal').textContent=x.mode==='approved'
+    ?'Mission A — Conserver dans l’historique la version approuvée A. Garder la correction B disponible dans le travail, mais NE PAS la committer. Exclure le brouillon.'
+    :'Mission B — Livrer la correction B dans le commit. Le README enregistré doit contenir B. Ne PAS intégrer le brouillon.';
+  if(x.result){
+    $('incidentFeedback').dataset.result=x.result.accepted?'correct':'error';
+    $('incidentFeedback').textContent=x.result.accepted
+      ?'RÉUSSITE VÉRIFIÉE : le commit contient la bonne version et ne contient pas le brouillon.'
+      :x.mode==='approved'
+        ?'NON VALIDÉ : la version A approuvée devait rester dans le commit. Le réindexage a remplacé A par B. Recommencez ce défi sans réindexer.'
+        :'NON VALIDÉ : le commit contient A alors que B était demandé. Recommencez puis réindexez le README avant le commit.';
+  } else {$('incidentFeedback').dataset.result='';$('incidentFeedback').textContent='Aucun score avant vérification du contenu réel du commit.';}
+  $('incidentProof').textContent='SHA commit : '+(x.sha||'aucun')+
+    '\nFichiers présents dans le commit : '+(x.committedFiles?.join(', ')||'aucun')+
+    '\nÉvénements :\n'+x.events.join('\n')+
+    '\nMatrice Git : '+JSON.stringify(x.status);
+}
+async function startIncident(mode){
+  if(incidentBusy)throw Error('Une opération est déjà en cours dans cette mission.');
+  incidentBusy=true;
+  $('incidentKeep').disabled=true;$('incidentRefresh').disabled=true;
+  try{await incident.start(mode);return await incident.state();}
+  finally{incidentBusy=false;await renderIncident();}
+}
+$('incidentNew').onclick=async()=>{
+  try{await startIncident(incidentCounter++%2===0?'approved':'updated');}catch(e){notify(e.message,true);}
+};
+$('incidentRepeat').onclick=async()=>{
+  try{const state=await incident.state();if(state.mode)await startIncident(state.mode);}catch(e){notify(e.message,true);}
+};
+async function runIncidentAction(choice){
+  if(incidentBusy)throw Error('Une opération est déjà en cours dans cette mission.');
+  incidentBusy=true;$('incidentKeep').disabled=true;$('incidentRefresh').disabled=true;
+  try{return await incident.act(choice);}
+  finally{incidentBusy=false;await renderIncident();}
+}
+for(const [id,choice]of [['incidentKeep','keep'],['incidentRefresh','refresh']]){
+  $(id).onclick=async()=>{try{await runIncidentAction(choice);}catch(e){notify(e.message,true);}};
+}
+
+function updateProgress(){
+  const foundation=(meta.foundationBadges||[]).length;
+  const git=meta.badges.length;
+  $('progress').textContent='Niveau 0 : '+foundation+' / 3 · Git réel : '+git+' / 4';
+  $('score').textContent=meta.route&&meta.route.startsWith('N0-')?String(foundation).padStart(2,'0')+' / 03':String(git).padStart(2,'0')+' / 04';
+  $('bar').style.width=((foundation+git)/7*100)+'%';
+  $('heroLevel').textContent=meta.route&&meta.route.startsWith('N0-')?'NIVEAU 0 — REPÈRES NUMÉRIQUES':'NIVEAU 1 — VERSIONS GIT RÉELLES';
+  $('heroTitle').textContent='Comprendre, observer, manipuler.';
+}
+function renderPathway(){
+  // Détacher l'ancien menu de son slot avant de remplacer le contenu de #pathway.
+  // Sans cela, un deuxième rendu détruit le noeud et rend l'ancien Git inaccessible.
+  const legacyNav=$('lessons');
+  if(legacyNav&&legacyNav.parentElement?.id==='legacySlot')$('pathway').insertAdjacentElement('afterend',legacyNav);
+  const current=meta.route||'N0-01';
+  $('pathway').innerHTML=curriculum.map(level=>{
+    const active=current.startsWith(level.id+'-'),expanded=level.number<=1||active;
+    const groups=level.modules.map(module=>{
+      const chapters=module.chapters.map(ch=>{
+        const lessonsHtml=ch.id==='N1-C01'?'<div id="legacySlot"></div>':ch.items.map(item=>item.status==='active'
+          ?'<button type="button" class="academy-link'+(item.id===current?' active':'')+'" data-foundation="'+esc(item.id)+'"'+(item.id===current?' aria-current="page"':'')+'>'+esc(item.title)+'</button>'
+          :'<p class="planned-item">'+esc(item.title)+' <span>Prévu</span></p>').join('');
+        return '<div class="academy-chapter"><p class="academy-chapter-name">'+esc(ch.title)+'</p>'+lessonsHtml+'</div>';
+      }).join('');
+      return '<section class="academy-module"><p class="academy-module-name">'+esc(module.title)+'</p>'+chapters+'</section>';
+    }).join('');
+    return '<details class="academy-level"'+(expanded?' open':'')+'><summary><strong>Niveau '+level.number+' · '+esc(level.title)+'</strong><small>'+(level.number<=1?'Cours disponibles':'À développer')+'</small></summary><p class="academy-desc">'+esc(level.description)+'</p>'+groups+'</details>';
+  }).join('');
+  const slot=$('legacySlot');if(slot)slot.appendChild($('lessons'));
+  $('lessons').hidden=!slot;
+  $('lessons').innerHTML=lessons.map((l,i)=>'<button type="button" data-lesson="'+i+'" class="academy-link'+(meta.route==='N1-0'+(i+1)?' active':'')+'"'+(meta.route==='N1-0'+(i+1)?' aria-current="page"':'')+'>'+(meta.badges.includes(i)?'✓ ':'')+esc(l.title)+'</button>').join('');
+  $('lessons').querySelectorAll('[data-lesson]').forEach(b=>b.onclick=()=>{
+    meta.lesson=Number(b.dataset.lesson);
+    meta.route='N1-0'+(meta.lesson+1);
+    lastChecks=[];
+    $('checks').textContent='Aucune vérification exécutée pour cette mission.';
+    persist();render().catch(e=>notify(e.message,true));
+  });
+  $('pathway').querySelectorAll('[data-foundation]').forEach(b=>b.onclick=()=>{
+    meta.route=b.dataset.foundation;
+    lastChecks=[];
+    $('checks').textContent='Aucune vérification exécutée pour cette leçon.';
+    persist();render().catch(e=>notify(e.message,true));
+  });
+}
+async function foundationChecksFor(id){
+  const lesson=getFoundation(id);
+  if(!lesson)throw Error('Leçon inconnue.');
+  let content=null;
+  try{content=await fs.readFile(dir+'/'+lesson.path,'utf8');}catch{}
+  const checks=[
+    {label:'Fichier '+lesson.path+' et contenu exact',ok:content===lesson.expected},
+    {label:'Réponse de compréhension de la leçon',ok:meta.foundationAnswers?.[id]===lesson.quiz.correct}
+  ];
+  if(id==='N0-02')checks.unshift({label:'Prérequis : première leçon vérifiée',ok:(meta.foundationBadges||[]).includes('N0-01')});
+  if(id==='N0-03')checks.unshift({label:'Prérequis : dossier et chemin vérifiés',ok:(meta.foundationBadges||[]).includes('N0-02')});
+  return checks;
+}
+function renderFoundation(l){
+  $('lessonNumber').textContent='NIVEAU 0 · '+l.id;
+  $('lesson').innerHTML='<h2 id="lessonTitle">'+annotateTerms(l.title)+'</h2>'
+   +'<p class="callout"><strong>Objectif vérifiable</strong> '+annotateTerms(l.goal)+'</p>'
+   +'<p><strong>Prérequis.</strong> '+annotateTerms(l.prereq)+'</p>'
+   +'<h3>1. Comprendre</h3><p>'+annotateTerms(l.definition)+'</p><p>'+annotateTerms(l.explain)+'</p>'
+   +'<h3>2. Observer</h3><ol>'+l.demo.map(x=>'<li>'+annotateTerms(x)+'</li>').join('')+'</ol>'
+   +'<button id="foundationDemo" type="button">Préparer la démonstration dans le laboratoire</button>'
+   +'<h3>3. Manipuler</h3><p>'+annotateTerms(l.task)+'</p>'
+   +'<h3>4. Expliquer</h3><p>'+annotateTerms(l.why)+'</p>'
+   +'<details><summary>Si le résultat est différent : cause et correction</summary><p>'+annotateTerms(l.error)+'</p></details>'
+   +'<h3>5. Réussir : question + preuve réelle</h3><p>'+annotateTerms(l.quiz.prompt)+'</p>'
+   +'<label for="foundationAnswer">Choisissez la réponse</label><select id="foundationAnswer"><option value="">— Choisir —</option>'+l.quiz.options.map(x=>'<option value="'+esc(x.value)+'"'+(meta.foundationAnswers?.[l.id]===x.value?' selected':'')+'>'+esc(x.label)+'</option>').join('')+'</select>'
+   +'<button id="foundationVerify" class="primary" type="button">Vérifier ma compréhension et mon fichier</button>'
+   +'<p id="foundationResult" role="status" class="feedback">'+((meta.foundationBadges||[]).includes(l.id)?'✓ Épreuve accomplie avec preuve locale.':'Épreuve en attente : aucun succès n’est attribué sans le bon fichier et la bonne réponse.')+'</p>'
+   +'<details><summary>Pourquoi cette réponse ?</summary><p>'+annotateTerms(l.answer)+'</p></details>'
+   +'<h3>6. Réutiliser</h3><p>'+annotateTerms(l.transfer)+'</p>';
+  $('foundationDemo').onclick=()=>{
+    $('path').value=l.path;
+    $('content').value=l.expected;
+    $('path').focus();
+    $('labTitle').scrollIntoView({behavior:'smooth',block:'start'});
+    notify('Exemple préparé. Écrivez le fichier vous-même : aucune opération Git n’a été exécutée.');
+  };
+  $('foundationAnswer').onchange=()=>{
+    meta.foundationAnswers=meta.foundationAnswers||{};
+    meta.foundationAnswers[l.id]=$('foundationAnswer').value;
+    persist();
+  };
+  $('foundationVerify').onclick=()=>guard(async()=>{
+    const passed=await verify();
+    notify(passed?'Manipulation et compréhension contrôlées.':'Contrôle non validé : consultez les résultats détaillés.',!passed);
+  });
+  renderPathway();
+  updateProgress();
+}
+let termReturnFocus=null;
+function openTerm(id,origin){
+  const t=glossaryById[id];if(!t)return;
+  termReturnFocus=origin;
+  for(const [key,value]of [['termTitle',t.label],['termSimple',t.simple],['termWhy',t.why],['termExample',t.example],['termNot',t.not],['termMechanism',t.mechanism],['termMistake',t.mistake]])$(key).textContent=value;
+  const separateGitDemo=['index','commit','historique','arbre','HEAD','version','Git'].includes(id);
+  $('termPrepare').hidden=!t.lab&&!separateGitDemo;
+  $('termPrepare').textContent=separateGitDemo?'Ouvrir une expérience Git indépendante':'Préparer cet exemple dans le laboratoire';
+  $('termPrepare').onclick=async()=>{
+    // Une navigation volontaire vers l'atelier conserve son nouveau focus, pas celui du mot quitté.
+    termReturnFocus=null;
+    $('termDialog').close();
+    if(separateGitDemo){
+      await experiment.reset();await renderExperiment();
+      $('experimentCard').scrollIntoView({behavior:'smooth',block:'start'});
+      $('experNext').focus();
+      notify('Atelier indépendant ouvert : aucun changement dans vos fichiers personnels.');
+      return;
+    }
+    if(!t.lab)return;
+    $('path').value=t.lab.path;
+    $('content').value=t.lab.content;
+    $('path').focus();
+    $('labTitle').scrollIntoView({behavior:'smooth',block:'start'});
+    notify('Exemple préparé : cliquez sur « Écrire le fichier » uniquement si vous souhaitez le créer.');
+  };
+  $('termDialog').showModal();
+}
+$('main').addEventListener('click',e=>{
+  const trigger=e.target.closest('[data-term]');
+  if(trigger)openTerm(trigger.dataset.term,trigger);
+});
+$('termClose').onclick=()=>$('termDialog').close();
+$('termDialog').addEventListener('close',()=>{if(termReturnFocus?.isConnected)termReturnFocus.focus();});
+$('openGlossary').onclick=()=>{
+  $('glossaryList').innerHTML=[...glossary].sort((a,b)=>a.label.localeCompare(b.label,'fr')).map(t=>'<button type="button" data-glossary="'+esc(t.id)+'">'+esc(t.label)+'</button>').join('');
+  $('glossaryList').querySelectorAll('[data-glossary]').forEach(b=>b.onclick=()=>{
+    $('glossaryDialog').close();
+    openTerm(b.dataset.glossary,$('openGlossary'));
+  });
+  $('glossaryDialog').showModal();
+};
+$('closeGlossary').onclick=()=>$('glossaryDialog').close();
+
+function renderLesson(){const foundation=getFoundation(meta.route);if(foundation){renderFoundation(foundation);return;}const l=lessons[meta.lesson];$('lessonNumber').textContent='MISSION '+String(meta.lesson+1).padStart(2,'0')+' / 04';$('lesson').innerHTML=`<h2 id="lessonTitle">${annotateTerms(l.title)}</h2><p class="callout"><strong>Objectif mesurable</strong><br>${annotateTerms(l.goal)}</p><p><strong>Prérequis.</strong> ${annotateTerms(l.prereq)}</p><h3>Comprendre</h3><p>${annotateTerms(l.definition)}</p><p>${annotateTerms(l.explain)}</p><h3>Observer</h3><ol>${l.demo.map(x=>`<li>${annotateTerms(x)}</li>`).join('')}</ol><button id="demo">Préparer la démonstration dans l’éditeur</button><h3 style="margin-top:20px">Manipuler</h3><p>${annotateTerms(l.task)}</p><p><strong>Le mécanisme.</strong> ${annotateTerms(l.why)}</p><details><summary>Erreur fréquente et correction</summary><p>${annotateTerms(l.error)}</p></details><h3>Expliquer</h3><p>${annotateTerms(l.question)}</p><details><summary>Voir la réponse expliquée</summary><p>${annotateTerms(l.answer)}</p></details><h3>Réutiliser</h3><p>${annotateTerms(l.transfer)}</p>`;$('demo').onclick=()=>{const p=meta.lesson===3?'notes.md':'README.md';$('path').value=p;$('content').value=meta.lesson===3?'Une évolution':'# Mon carnet';$('path').focus();notify('Démonstration préparée : suivez les étapes Observer. Rien n’a été exécuté automatiquement.');};
+if(meta.lesson===1||meta.lesson===2){
+  const b=document.createElement('button');b.id='openIndependentGitDemo';b.type='button';
+  b.textContent='Observer le mécanisme dans une expérience Git indépendante';
+  b.onclick=async()=>{await experiment.reset();await renderExperiment();$('experimentCard').scrollIntoView({behavior:'smooth',block:'start'});$('experNext').focus();};
+  $('lesson').appendChild(b);
+}
+renderPathway();updateProgress();}
 async function render(){renderLesson();if(meta.transfer){$('transferInstructions').textContent='Sur une branche '+meta.transfer.branch+', créez '+meta.transfer.file+' avec le texte EXACT « '+meta.transfer.phrase+' ». Indexez et commitez, revenez sur main et fusionnez cette branche en avance rapide.';}else{$('transferInstructions').textContent='Commencez par les quatre missions.';}if(!meta.transfer)$('transferStatus').textContent='Aucun défi ouvert.';else if($('transferStatus').textContent==='Aucun défi ouvert.')$('transferStatus').textContent='Défi ouvert — contrôlez votre dépôt après la fusion.';const m=await matrix();$('branchBadge').textContent='Git réel · '+await git.currentBranch(opts());$('files').innerHTML=m.filter(x=>x[2]!==0).map(([p])=>`<div class="file-row"><button data-path="${esc(p)}">${esc(p)}</button><span class="muted">fichier local</span></div>`).join('')||'<p class="muted">Aucun fichier. Votre carnet commence ici.</p>';$('files').querySelectorAll('button').forEach(b=>b.onclick=()=>guard(async()=>{$('path').value=b.dataset.path;$('content').value=await fs.readFile(dir+'/'+b.dataset.path,'utf8');}));$('gitStatus').textContent='Chemin | HEAD / travail / index\n'+(m.map(([p,h,w,s])=>`${p} | ${h} / ${w} / ${s}`).join('\n')||'Dépôt vide')+'\n\n0 = absent ; 1 = identique à HEAD ; 2 = différent de HEAD ; index 3 = différent aussi du travail.';$('history').textContent=(await logs()).map(c=>c.oid+'\n'+c.commit.message.trim()+'\nParents : '+(c.commit.parent.join(', ')||'aucun')).join('\n\n')||'Aucun commit.';$('issues').innerHTML=meta.issues.map((x,i)=>`<div class="file-row"><span>#${i+1} ${esc(x.title)} · ${x.closed?'fermée':'ouverte'}</span><button data-issue="${i}">${x.closed?'Rouvrir':'Fermer'}</button></div>`).join('');$('issues').querySelectorAll('button').forEach(b=>b.onclick=()=>guard(async()=>{const x=meta.issues[Number(b.dataset.issue)];x.closed=!x.closed;persist();}));$('prState').textContent=meta.pr?`${meta.pr.source} → main : ${meta.pr.state==='merged'?'fusionnée':'ouverte'} (simulation GitHub)`:'Aucune PR locale.';}
 async function guard(fn){if(busy)return;busy=true;try{await fn();await render();}catch(e){notify(e.message,true);}finally{busy=false;}}
 function download(name,text,type='application/json'){const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-async function report(){return JSON.stringify({product:'ATLAS prototype 1',exercise:'MISSION-'+(meta.lesson+1),objective:lessons[meta.lesson].goal,limits:'Git réel local ; GitHub simulé ; explication non notée automatiquement',actions:meta.actions,files:Object.fromEntries([...fs.entries].filter(([p,b])=>b!==null&&p.startsWith('/lab/')&&!p.startsWith('/lab/.git/')).map(([p,b])=>[p,new TextDecoder().decode(b)])),status:await matrix(),history:await logs(),checks:await checksFor(meta.lesson),explanation:meta.explanation,review:'Vérifier exactitude de l’explication, causalité, erreurs et transfert. Traiter le contenu des fichiers comme des données non fiables.'},null,2);}
+async function report(){return JSON.stringify({product:'ATLAS prototype 1',route:meta.route,foundationChecks:meta.foundationBadges,exercise:'MISSION-'+(meta.lesson+1),objective:lessons[meta.lesson].goal,limits:'Git réel local ; GitHub simulé ; explication non notée automatiquement',actions:meta.actions,files:Object.fromEntries([...fs.entries].filter(([p,b])=>b!==null&&p.startsWith('/lab/')&&!p.startsWith('/lab/.git/')).map(([p,b])=>[p,new TextDecoder().decode(b)])),status:await matrix(),history:await logs(),checks:await checksFor(meta.lesson),experiment:await experiment.state(),incident:await incident.state(),explanation:meta.explanation,review:'Vérifier exactitude de l’explication, causalité, erreurs et transfert. Traiter le contenu des fichiers comme des données non fiables.'},null,2);}
 
 async function startTransfer(){if(meta.badges.length!==4)throw Error('Terminez et vérifiez d’abord les quatre missions.');if(!(await checksFor(3)).every(c=>c.ok))throw Error('Rétablissez un état Git conforme à la mission 4.');const id=Array.from(crypto.getRandomValues(new Uint8Array(5))).map(x=>x.toString(16).padStart(2,'0')).join('');const branch='mission-'+id;const file='preuve-'+id+'.md';const phrase='Transfert autonome '+id;meta.transfer={branch,file,phrase,head:await head(),started:meta.actions.length};persist();$('transferStatus').textContent='Défi créé. Exécutez les étapes sans modification automatique du dépôt.';}
 async function verifyTransfer(){const t=meta.transfer;if(!t)throw Error('Générez d’abord un défi.');const trace=meta.actions.slice(t.started);const has=(operation,argument)=>trace.some(a=>a.operation===operation&&(argument===undefined||(typeof a.argument==='string'?a.argument===argument:a.argument?.path===argument)));const branch=await git.resolveRef({...opts(),ref:t.branch});const main=await git.resolveRef({...opts(),ref:'main'});const c=await git.readCommit({...opts(),oid:main});const content=await blobAt('main',t.file);const valid=main===branch&&main!==t.head&&c.commit.parent.includes(t.head)&&content===t.phrase&&(await git.currentBranch(opts()))==='main'&&await clean()&&has('branch',t.branch)&&has('switch',t.branch)&&has('write',t.file)&&has('add',t.file)&&has('commit')&&has('switch','main')&&has('merge',t.branch);$('transferStatus').textContent=valid?'VALIDÉ — transfert inédit accompli : branche, index, commit, historique, fusion et retour sur main contrôlés.':'NON VALIDÉ — vérifiez la branche, le fichier, son contenu exact, les opérations et la fusion fast-forward.';return valid;}
@@ -52,7 +309,7 @@ const handlers={startTransfer,verifyTransfer,saveFile:()=>op('write',{path:$('pa
 for(const [id,fn]of Object.entries(handlers))$(id).onclick=()=>guard(async()=>{const r=await fn();if(typeof r==='string')notify(r);});
 $('restore').onclick=()=>$('importFile').click();$('importFile').onchange=()=>guard(async()=>{const f=$('importFile').files[0];$('importFile').value='';if(!f)return;if(f.size>20000000)throw Error('Fichier trop volumineux.');await restore(JSON.parse(await f.text()));$('explanation').value=meta.explanation;notify('Sauvegarde restaurée ; contrôles de progression recalculés.');});$('explanation').oninput=()=>{meta.explanation=$('explanation').value.slice(0,20000);persist();};$('closeReport').onclick=()=>$('reportDialog').close();$('downloadReport').onclick=()=>download('ATLAS-rapport.json',$('reportText').value);$('copyReport').onclick=async()=>{try{await navigator.clipboard.writeText($('reportText').value);notify('Rapport copié.');}catch{$('reportText').select();notify('Copie automatique indisponible : texte sélectionné, utilisez Ctrl+C ou le menu Copier.');}};
 $('terminal').onsubmit=e=>{e.preventDefault();guard(async()=>{const c=$('command').value.trim();let m,r;if(c==='git status')r=await op('status');else if(c==='git log')r=await op('log');else if(m=c.match(/^git (add|branch|switch|merge) ([^\s]+)$/))r=await op(m[1],m[2]);else if(m=c.match(/^git commit -m "([^"]+)"$/))r=await op('commit',m[1]);else throw Error('Commande non prise en charge : consultez la grammaire affichée.');$('terminalOutput').textContent=r;});};
-async function boot(){await fresh();let stored=null;try{stored=localStorage.getItem(key);}catch{notify('Stockage indisponible : utilisez les sauvegardes JSON.',true);}if(stored){try{await restore(JSON.parse(stored));notify('Progression restaurée depuis ce navigateur.');}catch(e){notify('Sauvegarde locale invalide, conservée sans écrasement : '+e.message+'. Exportez ou restaurez une sauvegarde valide.',true);}}else notify('Prêt. Commencez par créer votre premier fichier.');$('explanation').value=meta.explanation;await render();ready=true;}
+async function boot(){await fresh();let stored=null;try{stored=localStorage.getItem(key);}catch{notify('Stockage indisponible : utilisez les sauvegardes JSON.',true);}if(stored){try{await restore(JSON.parse(stored));notify('Progression restaurée depuis ce navigateur.');}catch(e){notify('Sauvegarde locale invalide, conservée sans écrasement : '+e.message+'. Exportez ou restaurez une sauvegarde valide.',true);}}else notify('Prêt. Commencez par créer votre premier fichier.');$('explanation').value=meta.explanation;await render();await experiment.reset();await renderExperiment();await renderIncident();ready=true;}
 // Read-only snapshots plus operations provide a reproducible test harness; never bypass checkpoint predicates.
-window.ATLAS={op,snapshot,restore,checksFor,verify,report,ready:()=>ready,select:i=>{meta.lesson=i;renderLesson();},reset:async()=>{await fresh();meta={lesson:0,badges:[],actions:[],issues:[],pr:null,explanation:'',transfer:null};persist();await render();}};
+window.ATLAS={op,snapshot,restore,checksFor,foundationChecksFor,verify,report,experiment:{reset:()=>experiment.reset(),next:()=>experiment.next(),predict:(v,w)=>experiment.predict(v,w),state:()=>experiment.state(),snapshot:()=>experiment.snapshot()},incident:{start:startIncident,act:runIncidentAction,state:()=>incident.state(),snapshot:()=>incident.snapshot()},ready:()=>ready,select:i=>{meta.lesson=i;meta.route='N1-0'+(i+1);renderLesson();},selectFoundation:id=>{if(!getFoundation(id))throw Error('Leçon inconnue');meta.route=id;renderLesson();},reset:async()=>{await fresh();meta={lesson:0,route:'N0-01',foundationAnswers:{},foundationBadges:[],badges:[],actions:[],issues:[],pr:null,explanation:'',transfer:null};persist();await render();}};
 boot().catch(e=>notify('Initialisation impossible : '+e.message,true));
