@@ -22,4 +22,26 @@
 </div>
 <details><summary>Afficher les références Git réellement enregistrées</summary><pre id="experProof" tabindex="0">Aucune référence pour le moment.</pre></details>
 <p class="muted"><small>Cette expérience reste temporaire : votre dépôt et vos sauvegardes de cours sont indépendants. Les résultats sont visibles dans le rapport d'exercice, sans envoi automatique.</small></p>
+</section><section class="card wide" id="incidentCard" aria-labelledby="incidentTitle">
+<p class="eyebrow">Transfert autonome · incident Git</p>
+<h2 id="incidentTitle">Quel changement faut-il réellement livrer ?</h2>
+<p>Le même dépôt contient un README approuvé (<strong>A</strong>), un README corrigé (<strong>B</strong>) et un brouillon non indexé. La bonne opération dépend de la demande : il n’existe pas de séquence de clics valable pour toutes les missions.</p>
+<p id="incidentGoal" class="exper-step" role="status" aria-live="polite">Lancez un défi pour découvrir l’objectif.</p>
+<div class="toolbar">
+<button id="incidentNew" type="button">Nouveau problème</button>
+<button id="incidentRepeat" type="button">Recommencer ce problème</button>
+</div>
+<div class="exper-grid">
+<div class="exper-state"><h3>Travail en cours</h3><p id="incidentWork">—</p></div>
+<div class="exper-state"><h3>Index déjà préparé</h3><p id="incidentStage">—</p></div>
+<div class="exper-state"><h3>Version livrée dans Git</h3><p id="incidentCommit">—</p></div>
+</div>
+<p>Choisissez une opération ; elle sera réellement exécutée dans ce dépôt indépendant.</p>
+<div class="toolbar">
+<button id="incidentKeep" type="button" disabled>Créer le commit avec l’index actuel</button>
+<button id="incidentRefresh" type="button" disabled>Réindexer README, puis créer le commit</button>
+</div>
+<p id="incidentFeedback" role="status" aria-live="polite"></p>
+<details><summary>Preuve technique : fichier inclus, fichiers exclus et identité du commit</summary><pre id="incidentProof" tabindex="0">Aucun défi commencé.</pre></details>
+<p class="muted"><small>Un résultat erroné reste visible et n’est pas récompensé. Le correctif consiste à relire la demande puis recommencer. Ce défi ne publie rien sur GitHub.</small></p>
 </section><section class="card"><p class="eyebrow">Vos preuves / vos données</p><h2>Expliquez votre démarche.</h2><p>Un état conforme démontre une manipulation. Votre explication doit encore être relue par un humain ou une IA ; elle n’est jamais notée automatiquement comme une expertise.</p><label for="explanation">Pourquoi vos actions produisent-elles ce résultat ?</label><textarea id="explanation" placeholder="Distinguez le fichier de travail, l’index et le commit…"></textarea><div class="toolbar"><button id="verify" class="primary">Vérifier ma mission</button><button id="report">Soumettre mon exercice à une IA</button><button id="restart">Recommencer le laboratoire</button></div><pre tabindex="0" id="checks">Aucune vérification exécutée.</pre><p class="muted">Le rapport est généré localement. Vous choisissez de le copier ou de le transmettre. N’y placez aucun secret.</p></section></div><div id="notice" class="notice" role="status" aria-live="polite">Initialisation du laboratoire…</div><footer>ATLAS · Git via isomorphic-git · stockage local selon les permissions du navigateur · export JSON recommandé · aucune connexion GitHub requise.</footer></main></div><input id="importFile" type="file" accept=".json,application/json" hidden><dialog id="reportDialog" aria-labelledby="reportTitle"><h2 id="reportTitle">Rapport de votre exercice</h2><p>Aucune transmission automatique. Relisez les fichiers avant de partager.</p><label for="reportText">Rapport à copier</label><textarea id="reportText" style="min-height:320px" readonly></textarea><div class="toolbar"><button id="copyReport">Copier le rapport</button><button id="downloadReport">Télécharger le rapport</button><button id="closeReport">Fermer</button></div></dialog><dialog id="glossaryDialog" class="term-dialog" aria-labelledby="glossaryTitle"><div class="modal-head"><h2 id="glossaryTitle">Lexique interactif A–Z</h2><button id="closeGlossary" type="button">Fermer</button></div><p class="muted">Ouvrez un terme pour découvrir sa définition, son utilité, un exemple et ses erreurs fréquentes.</p><div id="glossaryList" class="glossary-list"></div></dialog><dialog id="termDialog" class="term-dialog" aria-labelledby="termTitle"><div class="modal-head"><h2 id="termTitle"></h2><button type="button" id="termClose">Fermer</button></div><p class="term-simple" id="termSimple"></p><h3>À quoi cela sert ?</h3><p id="termWhy"></p><h3>Exemple concret</h3><p id="termExample"></p><h3>À ne pas confondre</h3><p id="termNot"></p><details><summary>Comprendre le mécanisme exact</summary><p id="termMechanism"></p></details><h3>Erreur fréquente et correction</h3><p id="termMistake"></p><button id="termPrepare" class="primary" type="button">Préparer cet exemple dans le laboratoire</button><p class="muted"><small>Préparer ne crée aucun fichier : vous décidez de l’enregistrer.</small></p></dialog><script>/*SCRIPT*/</script></body></html>
