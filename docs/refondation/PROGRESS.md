@@ -13,12 +13,12 @@ Ce fichier distingue **écrit**, **testé** et **validé**. Une case [x] signifi
 - [ ] B02 — Comparer les outils candidats et décisions de dépendances (à faire).
 
 ## C — Parcours pédagogique
-- [ ] C01 — Catalogue niveaux / modules / chapitres / leçons : codé dans `src/curriculum.js`, tests attendus.
-- [ ] C02 — Navigation visible et distinction actif/prévu : codée dans `src/app.js`, tests attendus.
+- [x] C01 — Catalogue niveaux / modules / chapitres / leçons : vérifié par P1-CATALOGUE (CI 38557184335).
+- [x] C02 — Navigation active et distinction disponible/prévu : vérifiées par P1-CATALOGUE et tests Git historiques (CI 38557184335).
 
 ## D — Fenêtres interactives
 - [ ] D01 — Lexique de 30 notions concrètes : codé dans `src/glossary.js`, revue de contenu à poursuivre.
-- [ ] D02 — Fenêtres accessibles au clic, clavier et tactile : code ajouté, tests attendus.
+- [ ] D02 — Fenêtres au clic et au clavier, retour du focus : vérifiés P1-LEXIQUE ; parcours tactiles spécifiques à compléter avant clôture.
 
 ## E — Laboratoire
 - [ ] E01 — Laboratoire GitHub fidèle (dépôt local réel ; Issues et PR actuellement simulées) : à approfondir.
@@ -44,11 +44,20 @@ Ce fichier distingue **écrit**, **testé** et **validé**. Une case [x] signifi
 ## I — Audits et livraison
 - [ ] I01 — Tests Git indépendants et contrôles négatifs sur le fichier de cette branche.
 - [ ] I02 — Audit pédagogique/lexical systématique sur chaque terme.
-- [ ] I03 — Tests file:// Chromium et Firefox + mobile, sauvegarde et reprise.
+- [x] I03 — Sur les contenus implémentés : Chromium 154 et Firefox 157 sous file://, mobile et sauvegarde/restauration vérifiés (CI 38557184335).
 - [ ] I04 — Audit accessibilité et sécurité complet.
 - [ ] J01 — Exercices GitHub distant autorisés et vérifiés.
-- [ ] J02 — Construction du HTML monolithique et preuve SHA finale.
+- [ ] J02 — Construction du fichier définitif complet et preuves SHA (une préversion testée existe ; cursus complet non livré).
 - [ ] J03 — Lien public de la préversion, puis validation utilisateur.
 
 ## Sécurité de la livraison
 Pas de fusion automatique dans `main`. Aucun cours prévu n'est interactif, et aucun test non exécuté ne doit être compté réussi. Le site `main` reste le prototype antérieur pendant l'audit.
+
+## Reçu vérifiable du premier lot — 14 octobre 2026
+
+- **CI GitHub Actions** : [run 38557184335](https://github.com/vialdjoukang-spec/GITHUB_Mastering/actions/runs/38557184335), succès.
+- **Tests du laboratoire** : 98 PASS, 0 FAIL ; notamment hiérarchie, lexique, trois leçons N0 positives/négatives, missions Git historiques, sauvegardes et accessibilité sur les vues testées.
+- **Ouverture directe hors ligne** : Chromium 154.0.8037.0 et Firefox 157.0 PASS sous file://, dans l'environnement GitHub Actions Ubuntu.
+- **Fichier de préversion** : `ATLAS.html` construit et synchronisé sur la branche par commit [c5d5ea8](https://github.com/vialdjoukang-spec/GITHUB_Mastering/commit/c5d5ea8c03bfad28754f60572eaf1cf233fd580c).
+- **Audit médical ou diplôme professionnel** : sans objet ; la compétence experte en GitHub n'est pas certifiée par ces tests fonctionnels.
+- **Reste ouvert** : revue humaine de toutes les définitions, essais tactiles ciblés, isolation des ateliers, vraie profondeur didactique, contenus des niveaux 2 à 5, validation utilisateur.
