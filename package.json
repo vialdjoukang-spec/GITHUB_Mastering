@@ -1,0 +1,36 @@
+{
+  "name": "github_mastering",
+  "version": "1.0.0",
+  "description": "ATLAS — laboratoire Git local autonome",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node tests/audit.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vialdjoukang-spec/GITHUB_Mastering.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/vialdjoukang-spec/GITHUB_Mastering/issues"
+  },
+  "homepage": "https://github.com/vialdjoukang-spec/GITHUB_Mastering#readme",
+  "dependencies": {
+    "buffer": "^6.0.3",
+    "isomorphic-git": "^1.44.2"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "esbuild": "^0.28.2",
+    "playwright": "^1.64.0"
+  },
+  "private": true
+}

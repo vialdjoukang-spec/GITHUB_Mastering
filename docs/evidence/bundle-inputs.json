@@ -1,0 +1,1873 @@
+{
+  "inputs": {
+    "node_modules/base64-js/index.js": {
+      "bytes": 3932,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/ieee754/index.js": {
+      "bytes": 2154,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/buffer/index.js": {
+      "bytes": 58353,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/base64-js/index.js",
+          "kind": "require-call",
+          "original": "base64-js"
+        },
+        {
+          "path": "node_modules/ieee754/index.js",
+          "kind": "require-call",
+          "original": "ieee754"
+        }
+      ],
+      "format": "cjs"
+    },
+    "src/shim.js": {
+      "bytes": 33,
+      "imports": [
+        {
+          "path": "node_modules/buffer/index.js",
+          "kind": "import-statement",
+          "original": "buffer"
+        }
+      ],
+      "format": "esm"
+    },
+    "node_modules/inherits/inherits_browser.js": {
+      "bytes": 753,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/safe-buffer/index.js": {
+      "bytes": 1670,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/buffer/index.js",
+          "kind": "require-call",
+          "original": "buffer"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/isarray/index.js": {
+      "bytes": 132,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/es-errors/type.js": {
+      "bytes": 75,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/es-object-atoms/index.js": {
+      "bytes": 67,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/es-errors/index.js": {
+      "bytes": 66,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/es-errors/eval.js": {
+      "bytes": 75,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/es-errors/range.js": {
+      "bytes": 77,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/es-errors/ref.js": {
+      "bytes": 79,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/es-errors/syntax.js": {
+      "bytes": 79,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/es-errors/uri.js": {
+      "bytes": 73,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/math-intrinsics/abs.js": {
+      "bytes": 73,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/math-intrinsics/floor.js": {
+      "bytes": 77,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/math-intrinsics/max.js": {
+      "bytes": 73,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/math-intrinsics/min.js": {
+      "bytes": 73,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/math-intrinsics/pow.js": {
+      "bytes": 73,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/math-intrinsics/round.js": {
+      "bytes": 77,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/math-intrinsics/isNaN.js": {
+      "bytes": 121,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/math-intrinsics/sign.js": {
+      "bytes": 214,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/math-intrinsics/isNaN.js",
+          "kind": "require-call",
+          "original": "./isNaN"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/gopd/gOPD.js": {
+      "bytes": 97,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/gopd/index.js": {
+      "bytes": 206,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/gopd/gOPD.js",
+          "kind": "require-call",
+          "original": "./gOPD"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/es-define-property/index.js": {
+      "bytes": 288,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/has-symbols/shams.js": {
+      "bytes": 1922,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/has-symbols/index.js": {
+      "bytes": 447,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/has-symbols/shams.js",
+          "kind": "require-call",
+          "original": "./shams"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/get-proto/Reflect.getPrototypeOf.js": {
+      "bytes": 150,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/get-proto/Object.getPrototypeOf.js": {
+      "bytes": 156,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/es-object-atoms/index.js",
+          "kind": "require-call",
+          "original": "es-object-atoms"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/function-bind/implementation.js": {
+      "bytes": 2043,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/function-bind/index.js": {
+      "bytes": 126,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/function-bind/implementation.js",
+          "kind": "require-call",
+          "original": "./implementation"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/call-bind-apply-helpers/functionCall.js": {
+      "bytes": 97,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/call-bind-apply-helpers/functionApply.js": {
+      "bytes": 99,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/call-bind-apply-helpers/reflectApply.js": {
+      "bytes": 132,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/call-bind-apply-helpers/actualApply.js": {
+      "bytes": 280,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/function-bind/index.js",
+          "kind": "require-call",
+          "original": "function-bind"
+        },
+        {
+          "path": "node_modules/call-bind-apply-helpers/functionApply.js",
+          "kind": "require-call",
+          "original": "./functionApply"
+        },
+        {
+          "path": "node_modules/call-bind-apply-helpers/functionCall.js",
+          "kind": "require-call",
+          "original": "./functionCall"
+        },
+        {
+          "path": "node_modules/call-bind-apply-helpers/reflectApply.js",
+          "kind": "require-call",
+          "original": "./reflectApply"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/call-bind-apply-helpers/index.js": {
+      "bytes": 511,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/function-bind/index.js",
+          "kind": "require-call",
+          "original": "function-bind"
+        },
+        {
+          "path": "node_modules/es-errors/type.js",
+          "kind": "require-call",
+          "original": "es-errors/type"
+        },
+        {
+          "path": "node_modules/call-bind-apply-helpers/functionCall.js",
+          "kind": "require-call",
+          "original": "./functionCall"
+        },
+        {
+          "path": "node_modules/call-bind-apply-helpers/actualApply.js",
+          "kind": "require-call",
+          "original": "./actualApply"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/dunder-proto/get.js": {
+      "bytes": 980,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/call-bind-apply-helpers/index.js",
+          "kind": "require-call",
+          "original": "call-bind-apply-helpers"
+        },
+        {
+          "path": "node_modules/gopd/index.js",
+          "kind": "require-call",
+          "original": "gopd"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/get-proto/index.js": {
+      "bytes": 821,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/get-proto/Reflect.getPrototypeOf.js",
+          "kind": "require-call",
+          "original": "./Reflect.getPrototypeOf"
+        },
+        {
+          "path": "node_modules/get-proto/Object.getPrototypeOf.js",
+          "kind": "require-call",
+          "original": "./Object.getPrototypeOf"
+        },
+        {
+          "path": "node_modules/dunder-proto/get.js",
+          "kind": "require-call",
+          "original": "dunder-proto/get"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/hasown/index.js": {
+      "bytes": 206,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/function-bind/index.js",
+          "kind": "require-call",
+          "original": "function-bind"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/get-intrinsic/index.js": {
+      "bytes": 14439,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/es-object-atoms/index.js",
+          "kind": "require-call",
+          "original": "es-object-atoms"
+        },
+        {
+          "path": "node_modules/es-errors/index.js",
+          "kind": "require-call",
+          "original": "es-errors"
+        },
+        {
+          "path": "node_modules/es-errors/eval.js",
+          "kind": "require-call",
+          "original": "es-errors/eval"
+        },
+        {
+          "path": "node_modules/es-errors/range.js",
+          "kind": "require-call",
+          "original": "es-errors/range"
+        },
+        {
+          "path": "node_modules/es-errors/ref.js",
+          "kind": "require-call",
+          "original": "es-errors/ref"
+        },
+        {
+          "path": "node_modules/es-errors/syntax.js",
+          "kind": "require-call",
+          "original": "es-errors/syntax"
+        },
+        {
+          "path": "node_modules/es-errors/type.js",
+          "kind": "require-call",
+          "original": "es-errors/type"
+        },
+        {
+          "path": "node_modules/es-errors/uri.js",
+          "kind": "require-call",
+          "original": "es-errors/uri"
+        },
+        {
+          "path": "node_modules/math-intrinsics/abs.js",
+          "kind": "require-call",
+          "original": "math-intrinsics/abs"
+        },
+        {
+          "path": "node_modules/math-intrinsics/floor.js",
+          "kind": "require-call",
+          "original": "math-intrinsics/floor"
+        },
+        {
+          "path": "node_modules/math-intrinsics/max.js",
+          "kind": "require-call",
+          "original": "math-intrinsics/max"
+        },
+        {
+          "path": "node_modules/math-intrinsics/min.js",
+          "kind": "require-call",
+          "original": "math-intrinsics/min"
+        },
+        {
+          "path": "node_modules/math-intrinsics/pow.js",
+          "kind": "require-call",
+          "original": "math-intrinsics/pow"
+        },
+        {
+          "path": "node_modules/math-intrinsics/round.js",
+          "kind": "require-call",
+          "original": "math-intrinsics/round"
+        },
+        {
+          "path": "node_modules/math-intrinsics/sign.js",
+          "kind": "require-call",
+          "original": "math-intrinsics/sign"
+        },
+        {
+          "path": "node_modules/gopd/index.js",
+          "kind": "require-call",
+          "original": "gopd"
+        },
+        {
+          "path": "node_modules/es-define-property/index.js",
+          "kind": "require-call",
+          "original": "es-define-property"
+        },
+        {
+          "path": "node_modules/has-symbols/index.js",
+          "kind": "require-call",
+          "original": "has-symbols"
+        },
+        {
+          "path": "node_modules/get-proto/index.js",
+          "kind": "require-call",
+          "original": "get-proto"
+        },
+        {
+          "path": "node_modules/get-proto/Object.getPrototypeOf.js",
+          "kind": "require-call",
+          "original": "get-proto/Object.getPrototypeOf"
+        },
+        {
+          "path": "node_modules/get-proto/Reflect.getPrototypeOf.js",
+          "kind": "require-call",
+          "original": "get-proto/Reflect.getPrototypeOf"
+        },
+        {
+          "path": "node_modules/call-bind-apply-helpers/functionApply.js",
+          "kind": "require-call",
+          "original": "call-bind-apply-helpers/functionApply"
+        },
+        {
+          "path": "node_modules/call-bind-apply-helpers/functionCall.js",
+          "kind": "require-call",
+          "original": "call-bind-apply-helpers/functionCall"
+        },
+        {
+          "path": "node_modules/function-bind/index.js",
+          "kind": "require-call",
+          "original": "function-bind"
+        },
+        {
+          "path": "node_modules/hasown/index.js",
+          "kind": "require-call",
+          "original": "hasown"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/call-bound/index.js": {
+      "bytes": 687,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/get-intrinsic/index.js",
+          "kind": "require-call",
+          "original": "get-intrinsic"
+        },
+        {
+          "path": "node_modules/call-bind-apply-helpers/index.js",
+          "kind": "require-call",
+          "original": "call-bind-apply-helpers"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/is-callable/index.js": {
+      "bytes": 3224,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/for-each/index.js": {
+      "bytes": 2374,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/is-callable/index.js",
+          "kind": "require-call",
+          "original": "is-callable"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/possible-typed-array-names/index.js": {
+      "bytes": 264,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/available-typed-arrays/index.js": {
+      "bytes": 475,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/possible-typed-array-names/index.js",
+          "kind": "require-call",
+          "original": "possible-typed-array-names"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/define-data-property/index.js": {
+      "bytes": 2336,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/es-define-property/index.js",
+          "kind": "require-call",
+          "original": "es-define-property"
+        },
+        {
+          "path": "node_modules/es-errors/syntax.js",
+          "kind": "require-call",
+          "original": "es-errors/syntax"
+        },
+        {
+          "path": "node_modules/es-errors/type.js",
+          "kind": "require-call",
+          "original": "es-errors/type"
+        },
+        {
+          "path": "node_modules/gopd/index.js",
+          "kind": "require-call",
+          "original": "gopd"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/has-property-descriptors/index.js": {
+      "bytes": 588,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/es-define-property/index.js",
+          "kind": "require-call",
+          "original": "es-define-property"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/set-function-length/index.js": {
+      "bytes": 1273,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/get-intrinsic/index.js",
+          "kind": "require-call",
+          "original": "get-intrinsic"
+        },
+        {
+          "path": "node_modules/define-data-property/index.js",
+          "kind": "require-call",
+          "original": "define-data-property"
+        },
+        {
+          "path": "node_modules/has-property-descriptors/index.js",
+          "kind": "require-call",
+          "original": "has-property-descriptors"
+        },
+        {
+          "path": "node_modules/gopd/index.js",
+          "kind": "require-call",
+          "original": "gopd"
+        },
+        {
+          "path": "node_modules/es-errors/type.js",
+          "kind": "require-call",
+          "original": "es-errors/type"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/call-bind-apply-helpers/applyBind.js": {
+      "bytes": 264,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/function-bind/index.js",
+          "kind": "require-call",
+          "original": "function-bind"
+        },
+        {
+          "path": "node_modules/call-bind-apply-helpers/functionApply.js",
+          "kind": "require-call",
+          "original": "./functionApply"
+        },
+        {
+          "path": "node_modules/call-bind-apply-helpers/actualApply.js",
+          "kind": "require-call",
+          "original": "./actualApply"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/call-bind/index.js": {
+      "bytes": 641,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/set-function-length/index.js",
+          "kind": "require-call",
+          "original": "set-function-length"
+        },
+        {
+          "path": "node_modules/es-define-property/index.js",
+          "kind": "require-call",
+          "original": "es-define-property"
+        },
+        {
+          "path": "node_modules/call-bind-apply-helpers/index.js",
+          "kind": "require-call",
+          "original": "call-bind-apply-helpers"
+        },
+        {
+          "path": "node_modules/call-bind-apply-helpers/applyBind.js",
+          "kind": "require-call",
+          "original": "call-bind-apply-helpers/applyBind"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/has-tostringtag/shams.js": {
+      "bytes": 189,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/has-symbols/shams.js",
+          "kind": "require-call",
+          "original": "has-symbols/shams"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/which-typed-array/index.js": {
+      "bytes": 3774,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/for-each/index.js",
+          "kind": "require-call",
+          "original": "for-each"
+        },
+        {
+          "path": "node_modules/available-typed-arrays/index.js",
+          "kind": "require-call",
+          "original": "available-typed-arrays"
+        },
+        {
+          "path": "node_modules/call-bind/index.js",
+          "kind": "require-call",
+          "original": "call-bind"
+        },
+        {
+          "path": "node_modules/call-bound/index.js",
+          "kind": "require-call",
+          "original": "call-bound"
+        },
+        {
+          "path": "node_modules/gopd/index.js",
+          "kind": "require-call",
+          "original": "gopd"
+        },
+        {
+          "path": "node_modules/get-proto/index.js",
+          "kind": "require-call",
+          "original": "get-proto"
+        },
+        {
+          "path": "node_modules/has-tostringtag/shams.js",
+          "kind": "require-call",
+          "original": "has-tostringtag/shams"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/is-typed-array/index.js": {
+      "bytes": 180,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/which-typed-array/index.js",
+          "kind": "require-call",
+          "original": "which-typed-array"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/typed-array-buffer/index.js": {
+      "bytes": 591,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/es-errors/type.js",
+          "kind": "require-call",
+          "original": "es-errors/type"
+        },
+        {
+          "path": "node_modules/call-bound/index.js",
+          "kind": "require-call",
+          "original": "call-bound"
+        },
+        {
+          "path": "node_modules/is-typed-array/index.js",
+          "kind": "require-call",
+          "original": "is-typed-array"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/to-buffer/index.js": {
+      "bytes": 3049,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/safe-buffer/index.js",
+          "kind": "require-call",
+          "original": "safe-buffer"
+        },
+        {
+          "path": "node_modules/isarray/index.js",
+          "kind": "require-call",
+          "original": "isarray"
+        },
+        {
+          "path": "node_modules/typed-array-buffer/index.js",
+          "kind": "require-call",
+          "original": "typed-array-buffer"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/sha.js/hash.js": {
+      "bytes": 1899,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/safe-buffer/index.js",
+          "kind": "require-call",
+          "original": "safe-buffer"
+        },
+        {
+          "path": "node_modules/to-buffer/index.js",
+          "kind": "require-call",
+          "original": "to-buffer"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/sha.js/sha1.js": {
+      "bytes": 2066,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/inherits/inherits_browser.js",
+          "kind": "require-call",
+          "original": "inherits"
+        },
+        {
+          "path": "node_modules/sha.js/hash.js",
+          "kind": "require-call",
+          "original": "./hash"
+        },
+        {
+          "path": "node_modules/safe-buffer/index.js",
+          "kind": "require-call",
+          "original": "safe-buffer"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/async-lock/lib/index.js": {
+      "bytes": 7054,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/async-lock/index.js": {
+      "bytes": 49,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/async-lock/lib/index.js",
+          "kind": "require-call",
+          "original": "./lib"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/clean-git-ref/lib/index.js": {
+      "bytes": 994,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/crc-32/crc32.js": {
+      "bytes": 3566,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/lib/utils/common.js": {
+      "bytes": 2444,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/lib/zlib/trees.js": {
+      "bytes": 39879,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/pako/lib/utils/common.js",
+          "kind": "require-call",
+          "original": "../utils/common"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/lib/zlib/adler32.js": {
+      "bytes": 1656,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/lib/zlib/crc32.js": {
+      "bytes": 1750,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/lib/zlib/messages.js": {
+      "bytes": 1538,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/lib/zlib/deflate.js": {
+      "bytes": 61184,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/pako/lib/utils/common.js",
+          "kind": "require-call",
+          "original": "../utils/common"
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/trees.js",
+          "kind": "require-call",
+          "original": "./trees"
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/adler32.js",
+          "kind": "require-call",
+          "original": "./adler32"
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/crc32.js",
+          "kind": "require-call",
+          "original": "./crc32"
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/messages.js",
+          "kind": "require-call",
+          "original": "./messages"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/lib/utils/strings.js": {
+      "bytes": 5293,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/pako/lib/utils/common.js",
+          "kind": "require-call",
+          "original": "./common"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/lib/zlib/zstream.js": {
+      "bytes": 1811,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/lib/deflate.js": {
+      "bytes": 11074,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/deflate.js",
+          "kind": "require-call",
+          "original": "./zlib/deflate"
+        },
+        {
+          "path": "node_modules/pako/lib/utils/common.js",
+          "kind": "require-call",
+          "original": "./utils/common"
+        },
+        {
+          "path": "node_modules/pako/lib/utils/strings.js",
+          "kind": "require-call",
+          "original": "./utils/strings"
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/messages.js",
+          "kind": "require-call",
+          "original": "./zlib/messages"
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/zstream.js",
+          "kind": "require-call",
+          "original": "./zlib/zstream"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/lib/zlib/inffast.js": {
+      "bytes": 12668,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/lib/zlib/inftrees.js": {
+      "bytes": 12500,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/pako/lib/utils/common.js",
+          "kind": "require-call",
+          "original": "../utils/common"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/lib/zlib/inflate.js": {
+      "bytes": 50284,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/pako/lib/utils/common.js",
+          "kind": "require-call",
+          "original": "../utils/common"
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/adler32.js",
+          "kind": "require-call",
+          "original": "./adler32"
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/crc32.js",
+          "kind": "require-call",
+          "original": "./crc32"
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/inffast.js",
+          "kind": "require-call",
+          "original": "./inffast"
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/inftrees.js",
+          "kind": "require-call",
+          "original": "./inftrees"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/lib/zlib/constants.js": {
+      "bytes": 2312,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/lib/zlib/gzheader.js": {
+      "bytes": 2240,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/lib/inflate.js": {
+      "bytes": 12412,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/inflate.js",
+          "kind": "require-call",
+          "original": "./zlib/inflate"
+        },
+        {
+          "path": "node_modules/pako/lib/utils/common.js",
+          "kind": "require-call",
+          "original": "./utils/common"
+        },
+        {
+          "path": "node_modules/pako/lib/utils/strings.js",
+          "kind": "require-call",
+          "original": "./utils/strings"
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/constants.js",
+          "kind": "require-call",
+          "original": "./zlib/constants"
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/messages.js",
+          "kind": "require-call",
+          "original": "./zlib/messages"
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/zstream.js",
+          "kind": "require-call",
+          "original": "./zlib/zstream"
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/gzheader.js",
+          "kind": "require-call",
+          "original": "./zlib/gzheader"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pako/index.js": {
+      "bytes": 347,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/pako/lib/utils/common.js",
+          "kind": "require-call",
+          "original": "./lib/utils/common"
+        },
+        {
+          "path": "node_modules/pako/lib/deflate.js",
+          "kind": "require-call",
+          "original": "./lib/deflate"
+        },
+        {
+          "path": "node_modules/pako/lib/inflate.js",
+          "kind": "require-call",
+          "original": "./lib/inflate"
+        },
+        {
+          "path": "node_modules/pako/lib/zlib/constants.js",
+          "kind": "require-call",
+          "original": "./lib/zlib/constants"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/pify/index.js": {
+      "bytes": 1676,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/ignore/index.js": {
+      "bytes": 16412,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/diff3/onp.js": {
+      "bytes": 5393,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/diff3/diff3.js": {
+      "bytes": 7851,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        },
+        {
+          "path": "node_modules/diff3/onp.js",
+          "kind": "require-call",
+          "original": "./onp"
+        }
+      ],
+      "format": "cjs"
+    },
+    "node_modules/isomorphic-git/index.js": {
+      "bytes": 565191,
+      "imports": [
+        {
+          "path": "node_modules/sha.js/sha1.js",
+          "kind": "import-statement",
+          "original": "sha.js/sha1.js"
+        },
+        {
+          "path": "node_modules/async-lock/index.js",
+          "kind": "import-statement",
+          "original": "async-lock"
+        },
+        {
+          "path": "node_modules/clean-git-ref/lib/index.js",
+          "kind": "import-statement",
+          "original": "clean-git-ref"
+        },
+        {
+          "path": "node_modules/crc-32/crc32.js",
+          "kind": "import-statement",
+          "original": "crc-32"
+        },
+        {
+          "path": "node_modules/pako/index.js",
+          "kind": "import-statement",
+          "original": "pako"
+        },
+        {
+          "path": "node_modules/pify/index.js",
+          "kind": "import-statement",
+          "original": "pify"
+        },
+        {
+          "path": "node_modules/ignore/index.js",
+          "kind": "import-statement",
+          "original": "ignore"
+        },
+        {
+          "path": "node_modules/diff3/diff3.js",
+          "kind": "import-statement",
+          "original": "diff3"
+        },
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "src/fs.js": {
+      "bytes": 2115,
+      "imports": [
+        {
+          "path": "node_modules/buffer/index.js",
+          "kind": "import-statement",
+          "original": "buffer"
+        },
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "src/lessons.js": {
+      "bytes": 6462,
+      "imports": [
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "esm"
+    },
+    "src/app.js": {
+      "bytes": 17967,
+      "imports": [
+        {
+          "path": "node_modules/isomorphic-git/index.js",
+          "kind": "import-statement",
+          "original": "isomorphic-git"
+        },
+        {
+          "path": "src/fs.js",
+          "kind": "import-statement",
+          "original": "./fs.js"
+        },
+        {
+          "path": "src/lessons.js",
+          "kind": "import-statement",
+          "original": "./lessons.js"
+        },
+        {
+          "path": "/workspace/GITHUB_Mastering/src/shim.js",
+          "kind": "import-statement",
+          "external": true
+        }
+      ],
+      "format": "cjs"
+    }
+  },
+  "outputs": {
+    "app.js": {
+      "imports": [],
+      "exports": [],
+      "entryPoint": "src/app.js",
+      "inputs": {
+        "node_modules/base64-js/index.js": {
+          "bytesInOutput": 1473
+        },
+        "node_modules/ieee754/index.js": {
+          "bytesInOutput": 986
+        },
+        "node_modules/buffer/index.js": {
+          "bytesInOutput": 25434
+        },
+        "src/shim.js": {
+          "bytesInOutput": 29
+        },
+        "node_modules/inherits/inherits_browser.js": {
+          "bytesInOutput": 336
+        },
+        "node_modules/safe-buffer/index.js": {
+          "bytesInOutput": 892
+        },
+        "node_modules/isarray/index.js": {
+          "bytesInOutput": 119
+        },
+        "node_modules/es-errors/type.js": {
+          "bytesInOutput": 59
+        },
+        "node_modules/es-object-atoms/index.js": {
+          "bytesInOutput": 56
+        },
+        "node_modules/es-errors/index.js": {
+          "bytesInOutput": 55
+        },
+        "node_modules/es-errors/eval.js": {
+          "bytesInOutput": 59
+        },
+        "node_modules/es-errors/range.js": {
+          "bytesInOutput": 60
+        },
+        "node_modules/es-errors/ref.js": {
+          "bytesInOutput": 64
+        },
+        "node_modules/es-errors/syntax.js": {
+          "bytesInOutput": 61
+        },
+        "node_modules/es-errors/uri.js": {
+          "bytesInOutput": 58
+        },
+        "node_modules/math-intrinsics/abs.js": {
+          "bytesInOutput": 58
+        },
+        "node_modules/math-intrinsics/floor.js": {
+          "bytesInOutput": 60
+        },
+        "node_modules/math-intrinsics/max.js": {
+          "bytesInOutput": 58
+        },
+        "node_modules/math-intrinsics/min.js": {
+          "bytesInOutput": 58
+        },
+        "node_modules/math-intrinsics/pow.js": {
+          "bytesInOutput": 58
+        },
+        "node_modules/math-intrinsics/round.js": {
+          "bytesInOutput": 60
+        },
+        "node_modules/math-intrinsics/isNaN.js": {
+          "bytesInOutput": 89
+        },
+        "node_modules/math-intrinsics/sign.js": {
+          "bytesInOutput": 105
+        },
+        "node_modules/gopd/gOPD.js": {
+          "bytesInOutput": 81
+        },
+        "node_modules/gopd/index.js": {
+          "bytesInOutput": 104
+        },
+        "node_modules/es-define-property/index.js": {
+          "bytesInOutput": 128
+        },
+        "node_modules/has-symbols/shams.js": {
+          "bytesInOutput": 844
+        },
+        "node_modules/has-symbols/index.js": {
+          "bytesInOutput": 226
+        },
+        "node_modules/get-proto/Reflect.getPrototypeOf.js": {
+          "bytesInOutput": 98
+        },
+        "node_modules/get-proto/Object.getPrototypeOf.js": {
+          "bytesInOutput": 85
+        },
+        "node_modules/function-bind/implementation.js": {
+          "bytesInOutput": 967
+        },
+        "node_modules/function-bind/index.js": {
+          "bytesInOutput": 89
+        },
+        "node_modules/call-bind-apply-helpers/functionCall.js": {
+          "bytesInOutput": 73
+        },
+        "node_modules/call-bind-apply-helpers/functionApply.js": {
+          "bytesInOutput": 74
+        },
+        "node_modules/call-bind-apply-helpers/reflectApply.js": {
+          "bytesInOutput": 92
+        },
+        "node_modules/call-bind-apply-helpers/actualApply.js": {
+          "bytesInOutput": 104
+        },
+        "node_modules/call-bind-apply-helpers/index.js": {
+          "bytesInOutput": 195
+        },
+        "node_modules/dunder-proto/get.js": {
+          "bytesInOutput": 386
+        },
+        "node_modules/get-proto/index.js": {
+          "bytesInOutput": 264
+        },
+        "node_modules/hasown/index.js": {
+          "bytesInOutput": 138
+        },
+        "node_modules/get-intrinsic/index.js": {
+          "bytesInOutput": 8261
+        },
+        "node_modules/call-bound/index.js": {
+          "bytesInOutput": 204
+        },
+        "node_modules/is-callable/index.js": {
+          "bytesInOutput": 1418
+        },
+        "node_modules/for-each/index.js": {
+          "bytesInOutput": 643
+        },
+        "node_modules/possible-typed-array-names/index.js": {
+          "bytesInOutput": 228
+        },
+        "node_modules/available-typed-arrays/index.js": {
+          "bytesInOutput": 208
+        },
+        "node_modules/define-data-property/index.js": {
+          "bytesInOutput": 1328
+        },
+        "node_modules/has-property-descriptors/index.js": {
+          "bytesInOutput": 212
+        },
+        "node_modules/set-function-length/index.js": {
+          "bytesInOutput": 514
+        },
+        "node_modules/call-bind-apply-helpers/applyBind.js": {
+          "bytesInOutput": 116
+        },
+        "node_modules/call-bind/index.js": {
+          "bytesInOutput": 233
+        },
+        "node_modules/has-tostringtag/shams.js": {
+          "bytesInOutput": 107
+        },
+        "node_modules/which-typed-array/index.js": {
+          "bytesInOutput": 1014
+        },
+        "node_modules/is-typed-array/index.js": {
+          "bytesInOutput": 88
+        },
+        "node_modules/typed-array-buffer/index.js": {
+          "bytesInOutput": 194
+        },
+        "node_modules/to-buffer/index.js": {
+          "bytesInOutput": 1163
+        },
+        "node_modules/sha.js/hash.js": {
+          "bytesInOutput": 977
+        },
+        "node_modules/sha.js/sha1.js": {
+          "bytesInOutput": 1131
+        },
+        "node_modules/async-lock/lib/index.js": {
+          "bytesInOutput": 3195
+        },
+        "node_modules/async-lock/index.js": {
+          "bytesInOutput": 54
+        },
+        "node_modules/clean-git-ref/lib/index.js": {
+          "bytesInOutput": 515
+        },
+        "node_modules/crc-32/crc32.js": {
+          "bytesInOutput": 1994
+        },
+        "node_modules/pako/lib/utils/common.js": {
+          "bytesInOutput": 1107
+        },
+        "node_modules/pako/lib/zlib/trees.js": {
+          "bytesInOutput": 6886
+        },
+        "node_modules/pako/lib/zlib/adler32.js": {
+          "bytesInOutput": 211
+        },
+        "node_modules/pako/lib/zlib/crc32.js": {
+          "bytesInOutput": 275
+        },
+        "node_modules/pako/lib/zlib/messages.js": {
+          "bytesInOutput": 222
+        },
+        "node_modules/pako/lib/zlib/deflate.js": {
+          "bytesInOutput": 14617
+        },
+        "node_modules/pako/lib/utils/strings.js": {
+          "bytesInOutput": 1744
+        },
+        "node_modules/pako/lib/zlib/zstream.js": {
+          "bytesInOutput": 254
+        },
+        "node_modules/pako/lib/deflate.js": {
+          "bytesInOutput": 2253
+        },
+        "node_modules/pako/lib/zlib/inffast.js": {
+          "bytesInOutput": 1862
+        },
+        "node_modules/pako/lib/zlib/inftrees.js": {
+          "bytesInOutput": 1688
+        },
+        "node_modules/pako/lib/zlib/inflate.js": {
+          "bytesInOutput": 11612
+        },
+        "node_modules/pako/lib/zlib/constants.js": {
+          "bytesInOutput": 433
+        },
+        "node_modules/pako/lib/zlib/gzheader.js": {
+          "bytesInOutput": 201
+        },
+        "node_modules/pako/lib/inflate.js": {
+          "bytesInOutput": 2753
+        },
+        "node_modules/pako/index.js": {
+          "bytesInOutput": 117
+        },
+        "node_modules/pify/index.js": {
+          "bytesInOutput": 846
+        },
+        "node_modules/ignore/index.js": {
+          "bytesInOutput": 3623
+        },
+        "node_modules/diff3/onp.js": {
+          "bytesInOutput": 1224
+        },
+        "node_modules/diff3/diff3.js": {
+          "bytesInOutput": 2033
+        },
+        "node_modules/isomorphic-git/index.js": {
+          "bytesInOutput": 156056
+        },
+        "src/fs.js": {
+          "bytesInOutput": 1930
+        },
+        "src/lessons.js": {
+          "bytesInOutput": 6821
+        },
+        "src/app.js": {
+          "bytesInOutput": 16205
+        }
+      },
+      "bytes": 293681
+    }
+  }
+}

@@ -1,0 +1,53 @@
+name: ATLAS local release verification
+on:
+  push:
+    branches: ["codex/atlas-local-release-20261014", "atlas-reconstruction"]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Install Chromium and Firefox for Playwright
+        run: npx playwright install --with-deps chromium firefox
+      - name: Build standalone HTML
+        run: npm run build
+      - name: Check no network dependencies in HTML
+        run: |
+          node -e "const fs=require('fs');const x=fs.readFileSync('ATLAS.html','utf8');if(/<(?:script|link)[^>]+(?:src|href)=[\\\"']https?:/i.test(x))process.exit(1)"
+      - name: Full Git and browser audit
+        run: npm test
+      - name: Verify direct file opening in Chromium and Firefox
+        run: node tests/local_open.mjs
+      - name: Synchronize verified standalone HTML to branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/codex/atlas-local-release-20261014'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add ATLAS.html
+          if ! git diff --cached --quiet; then
+            git commit -m 'build: synchroniser ATLAS.html après validation complète'
+            git push origin HEAD:codex/atlas-local-release-20261014
+          fi
+      - name: Record local deliverable and test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-local-verification
+          path: |
+            ATLAS.html
+            docs/evidence/results.json
+            docs/evidence/file-local.json
+            docs/evidence/screenshots/
+            docs/evidence/axe-*.json
+          if-no-files-found: warn

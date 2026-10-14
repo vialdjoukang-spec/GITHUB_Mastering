@@ -1,0 +1,2 @@
+# ATLAS
+Lire docs/SPEC.md, docs/CURRICULUM.md et docs/STATE.md. Source : src/ ; livrable : ATLAS.html généré par npm run build. Ne pas éditer le bundle. Aucun CDN ni réseau indispensable. Git réel via isomorphic-git ; simulations GitHub toujours étiquetées. Aucun PASS sans test exécuté. Preuves : docs/evidence. Avant changement lire seulement les fichiers pertinents. Après changement : build, tests ciblés et régression. Ne jamais exporter de secrets. Maintenir STATE.md court.
