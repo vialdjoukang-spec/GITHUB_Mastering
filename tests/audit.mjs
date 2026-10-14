@@ -105,12 +105,15 @@ await test(1,'P1-EXPERIMENT-CAUSAL','Atelier Git indépendant avec prédiction e
   assert((await page.locator('#experFeedback').textContent()).startsWith('Exact'));
   assert(await page.locator('#experNext').isEnabled());
   await page.locator('#experNext').click();
+  await page.waitForFunction(async()=>{const s=await ATLAS.experiment.state();return s.step===4&&s.committed==='Version A';});
   state=await page.evaluate(()=>ATLAS.experiment.state());
   assert.equal(state.committed,'Version A');
   assert.equal(state.working,'Version B');
   assert.equal(state.prepared,'Version A');
   await page.locator('#experNext').click();
+  await page.waitForFunction(async()=> (await ATLAS.experiment.state()).step===5);
   await page.locator('#experNext').click();
+  await page.waitForFunction(async()=>{const s=await ATLAS.experiment.state();return s.step===6&&s.committed==='Version B';});
   state=await page.evaluate(()=>ATLAS.experiment.state());
   assert.equal(state.committed,'Version B');
   assert.equal(state.working,'Version B');
