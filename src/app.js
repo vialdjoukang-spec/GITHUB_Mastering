@@ -238,6 +238,8 @@ function openTerm(id,origin){
   $('termPrepare').hidden=!t.lab&&!separateGitDemo;
   $('termPrepare').textContent=separateGitDemo?'Ouvrir une expérience Git indépendante':'Préparer cet exemple dans le laboratoire';
   $('termPrepare').onclick=async()=>{
+    // Une navigation volontaire vers l'atelier conserve son nouveau focus, pas celui du mot quitté.
+    termReturnFocus=null;
     $('termDialog').close();
     if(separateGitDemo){
       await experiment.reset();await renderExperiment();
