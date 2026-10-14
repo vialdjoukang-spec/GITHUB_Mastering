@@ -104,7 +104,7 @@ await test(1,'P1-LEXIQUE-LAB','Un terme renvoie vers l’expérience indépendan
   await page.locator('#lesson [data-term="index"]').first().click();
   await page.locator('#termPrepare').click();
   await page.waitForFunction(async()=> (await ATLAS.experiment.state()).step===0);
-  assert(await page.locator('#experNext').isFocused());
+  assert(await page.locator('#experNext').evaluate(el=>document.activeElement===el));
   assert.equal(JSON.stringify((await snap()).files),files);
 });
 await test(1,'P1-LEXIQUE-TOUCH','Une fenêtre lexicale s’ouvre et se ferme au toucher',async()=>{
