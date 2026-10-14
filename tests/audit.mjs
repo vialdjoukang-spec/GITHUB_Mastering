@@ -85,18 +85,27 @@ await test(1,'P1-FONDATIONS-NEG','Réponse erronée et fichier absent ne donnent
 await test(1,'P1-LEXIQUE-EXHAUSTIF','Toutes les entrées affichent une définition et un mécanisme non vides',async()=>{
   await reset();
   await page.locator('#openGlossary').click();
-  const ids=await page.locator('#glossaryList button').evaluateAll(nodes=>nodes.map(x=>x.dataset.glossary));
-  assert(ids.length>=30,'Vocabulaire central incomplet');
-  assert.equal(new Set(ids).size,ids.length,'Doublons dans le lexique');
-  for(const id of ids){
-    await page.locator('#glossaryList [data-glossary="'+id+'"]').click();
-    assert(await page.locator('#termDialog').isVisible(),'Fenêtre absente pour '+id);
-    for(const field of ['termSimple','termWhy','termExample','termNot','termMechanism','termMistake'])
-      assert((await page.locator('#'+field).textContent()).trim().length>=25,id+' : '+field+' est vide ou insuffisant');
-    await page.locator('#termClose').click();
-    await page.locator('#openGlossary').click();
+  try{
+    const ids=await page.locator('#glossaryList button').evaluateAll(nodes=>nodes.map(x=>x.dataset.glossary));
+    assert(ids.length>=30,'Vocabulaire central incomplet');
+    assert.equal(new Set(ids).size,ids.length,'Doublons dans le lexique');
+    for(const id of ids){
+      await page.locator('#glossaryList [data-glossary="'+id+'"]').click();
+      assert(await page.locator('#termDialog').isVisible(),'Fenêtre absente pour '+id);
+      for(const field of ['termSimple','termWhy','termExample','termNot','termMechanism','termMistake'])
+        assert((await page.locator('#'+field).textContent()).trim().length>=25,id+' : '+field+' est vide ou insuffisant');
+      await page.locator('#termClose').click();
+      await page.locator('#openGlossary').click();
+    }
+  } finally {
+    // Une erreur lexicale ne doit pas masquer tous les autres tests sous un dialogue modal.
+    await page.evaluate(()=>{
+      const t=document.getElementById('termDialog');
+      const g=document.getElementById('glossaryDialog');
+      if(t?.open)t.close();
+      if(g?.open)g.close();
+    });
   }
-  await page.locator('#closeGlossary').click();
 });
 await test(1,'P1-LEXIQUE-LAB','Un terme renvoie vers l’expérience indépendante sans toucher aux fichiers',async()=>{
   await reset();const files=JSON.stringify((await snap()).files);
