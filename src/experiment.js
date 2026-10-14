@@ -70,7 +70,7 @@ export const experimentExplanations=[
  * Ne jamais valider seulement le bouton choisi.
  */
 export class IncidentChallenge {
-  constructor(){this.fs=null;this.mode=null;this.attempted=false;this.result=null;this.events=[];}
+  constructor(){this.fs=null;this.mode=null;this.attempted=false;this.lastChoice=null;this.result=null;this.events=[];}
   get opts(){return {fs:this.fs,dir:'/incident'};}
   async start(mode){
     if(!['approved','updated'].includes(mode))throw Error('Scénario invalide.');
@@ -80,14 +80,14 @@ export class IncidentChallenge {
     await git.add({...this.opts,filepath:'README.md'});
     await this.fs.writeFile('/incident/README.md','Version B corrigée');
     await this.fs.writeFile('/incident/brouillon.txt','Ne pas publier');
-    this.mode=mode;this.attempted=false;this.result=null;this.events=['README A indexé','README modifié en B','Brouillon non indexé'];
+    this.mode=mode;this.attempted=false;this.lastChoice=null;this.result=null;this.events=['README A indexé','README modifié en B','Brouillon non indexé'];
     return this.state();
   }
   async act(choice){
     if(!this.fs||!this.mode)throw Error('Ouvrez une mission avant de choisir une action.');
     if(this.attempted)throw Error('Mission déjà exécutée : recommencez pour retenter avec le même objectif.');
     if(!['keep','refresh'].includes(choice))throw Error('Action inconnue.');
-    this.attempted=true;
+    this.attempted=true;this.lastChoice=choice;
     if(choice==='refresh'){
       await git.add({...this.opts,filepath:'README.md'});
       this.events.push('Actualiser index avec version B');
@@ -112,7 +112,7 @@ export class IncidentChallenge {
     }catch{}
     return {mode:this.mode,attempted:this.attempted,result:this.result,sha,
       working:await this.fs.readFile('/incident/README.md','utf8'),
-      prepared:this.attempted?(this.result?.choice==='refresh'?'Version B corrigée':'Version A approuvée'):'Version A approuvée',
+      prepared:this.attempted?(this.lastChoice==='refresh'?'Version B corrigée':'Version A approuvée'):'Version A approuvée',
       committed,committedFiles,status:await git.statusMatrix(this.opts),events:this.events.slice()};
   }
   snapshot(){return this.fs?.snapshot()||{};}
