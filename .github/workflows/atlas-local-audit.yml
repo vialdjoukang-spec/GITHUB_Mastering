@@ -18,8 +18,8 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci
-      - name: Install Chromium for Playwright
-        run: npx playwright install --with-deps chromium
+      - name: Install Chromium and Firefox for Playwright
+        run: npx playwright install --with-deps chromium firefox
       - name: Build standalone HTML
         run: npm run build
       - name: Check no network dependencies in HTML
@@ -27,6 +27,8 @@ jobs:
           node -e "const fs=require('fs');const x=fs.readFileSync('ATLAS.html','utf8');if(/<(?:script|link)[^>]+(?:src|href)=[\\\"']https?:/i.test(x))process.exit(1)"
       - name: Full Git and browser audit
         run: npm test
+      - name: Verify direct file opening in Chromium and Firefox
+        run: node tests/local_open.mjs
       - name: Record local deliverable and test evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -35,6 +37,7 @@ jobs:
           path: |
             ATLAS.html
             docs/evidence/results.json
+            docs/evidence/file-local.json
             docs/evidence/screenshots/
             docs/evidence/axe-*.json
           if-no-files-found: warn
