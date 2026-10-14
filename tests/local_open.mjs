@@ -55,6 +55,14 @@ async function run(type, name) {
     assert.equal(experiment.working,'Version B');
     // Aucun des gestes de l'expérience n'altère les fichiers du laboratoire principal.
     assert(!(await page.evaluate(()=>ATLAS.snapshot())).files['/lab/README.md']);
+    await page.evaluate(()=>ATLAS.incident.start('updated'));
+    await page.locator('#incidentRefresh').click();
+    await page.waitForFunction(async()=>{const x=await ATLAS.incident.state();return x.attempted&&x.result!==null;});
+    const incident=await page.evaluate(()=>ATLAS.incident.state());
+    assert(incident.result.accepted);
+    assert.equal(incident.committed,'Version B corrigée');
+    assert.deepEqual(incident.committedFiles,['README.md']);
+    assert(!(await page.evaluate(()=>ATLAS.snapshot())).files['/lab/README.md']);
     await page.evaluate(()=>ATLAS.reset());
     await op('write',{path:'README.md',content:'# Mon carnet'});
     await op('write',{path:'transfert.md',content:'Autre contexte'});
@@ -110,7 +118,7 @@ async function run(type, name) {
     assert(width);
     assert.deepEqual(exceptions,[],'Exceptions JavaScript');
     assert(requests.every(u=>u.startsWith('file://')),'Aucune requête réseau');
-    const status={name,version:browser.version(),file_url:url,sha256,theme,levels:true,glossary:true,foundation:true,git:true,transfer:true,restore:true,report:true,no_network:true,errors:exceptions,passed:true};
+    const status={name,version:browser.version(),file_url:url,sha256,theme,levels:true,glossary:true,foundation:true,experiment:true,incident:true,git:true,transfer:true,restore:true,report:true,no_network:true,errors:exceptions,passed:true};
     results.push(status);
     console.log('PASS file://',name,browser.version());
   } catch(e) {
