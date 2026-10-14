@@ -9,6 +9,7 @@ const experiment=new CommitExperiment();
 let experimentBusy=false;
 const incident=new IncidentChallenge();
 let incidentCounter=0;
+let incidentBusy=false;
 let fs=new MemoryFS(), meta={lesson:0,route:'N0-01',foundationAnswers:{},foundationBadges:[],badges:[],actions:[],issues:[],pr:null,explanation:'',transfer:null},busy=false,lastChecks=[],ready=false;
 const opts=()=>({fs,dir});
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -100,9 +101,9 @@ $('experPredict').onclick=async()=>{
 
 async function renderIncident(){
   const x=await incident.state();
-  $('incidentKeep').disabled=!x.mode||x.attempted;
-  $('incidentRefresh').disabled=!x.mode||x.attempted;
-  $('incidentRepeat').disabled=!x.mode;
+  $('incidentKeep').disabled=incidentBusy||!x.mode||x.attempted;
+  $('incidentRefresh').disabled=incidentBusy||!x.mode||x.attempted;
+  $('incidentRepeat').disabled=incidentBusy||!x.mode;
   $('incidentWork').textContent=x.working??'—';
   $('incidentStage').textContent=x.prepared??'—';
   $('incidentCommit').textContent=x.committed??'Pas de commit';
@@ -128,15 +129,27 @@ async function renderIncident(){
     '\nÉvénements :\n'+x.events.join('\n')+
     '\nMatrice Git : '+JSON.stringify(x.status);
 }
-async function startIncident(mode){await incident.start(mode);await renderIncident();return incident.state();}
+async function startIncident(mode){
+  if(incidentBusy)throw Error('Une opération est déjà en cours dans cette mission.');
+  incidentBusy=true;
+  $('incidentKeep').disabled=true;$('incidentRefresh').disabled=true;
+  try{await incident.start(mode);return await incident.state();}
+  finally{incidentBusy=false;await renderIncident();}
+}
 $('incidentNew').onclick=async()=>{
   try{await startIncident(incidentCounter++%2===0?'approved':'updated');}catch(e){notify(e.message,true);}
 };
 $('incidentRepeat').onclick=async()=>{
   try{const state=await incident.state();if(state.mode)await startIncident(state.mode);}catch(e){notify(e.message,true);}
 };
+async function runIncidentAction(choice){
+  if(incidentBusy)throw Error('Une opération est déjà en cours dans cette mission.');
+  incidentBusy=true;$('incidentKeep').disabled=true;$('incidentRefresh').disabled=true;
+  try{return await incident.act(choice);}
+  finally{incidentBusy=false;await renderIncident();}
+}
 for(const [id,choice]of [['incidentKeep','keep'],['incidentRefresh','refresh']]){
-  $(id).onclick=async()=>{try{await incident.act(choice);await renderIncident();}catch(e){notify(e.message,true);}};
+  $(id).onclick=async()=>{try{await runIncidentAction(choice);}catch(e){notify(e.message,true);}};
 }
 
 function updateProgress(){
@@ -298,5 +311,5 @@ $('restore').onclick=()=>$('importFile').click();$('importFile').onchange=()=>gu
 $('terminal').onsubmit=e=>{e.preventDefault();guard(async()=>{const c=$('command').value.trim();let m,r;if(c==='git status')r=await op('status');else if(c==='git log')r=await op('log');else if(m=c.match(/^git (add|branch|switch|merge) ([^\s]+)$/))r=await op(m[1],m[2]);else if(m=c.match(/^git commit -m "([^"]+)"$/))r=await op('commit',m[1]);else throw Error('Commande non prise en charge : consultez la grammaire affichée.');$('terminalOutput').textContent=r;});};
 async function boot(){await fresh();let stored=null;try{stored=localStorage.getItem(key);}catch{notify('Stockage indisponible : utilisez les sauvegardes JSON.',true);}if(stored){try{await restore(JSON.parse(stored));notify('Progression restaurée depuis ce navigateur.');}catch(e){notify('Sauvegarde locale invalide, conservée sans écrasement : '+e.message+'. Exportez ou restaurez une sauvegarde valide.',true);}}else notify('Prêt. Commencez par créer votre premier fichier.');$('explanation').value=meta.explanation;await render();await experiment.reset();await renderExperiment();await renderIncident();ready=true;}
 // Read-only snapshots plus operations provide a reproducible test harness; never bypass checkpoint predicates.
-window.ATLAS={op,snapshot,restore,checksFor,foundationChecksFor,verify,report,experiment:{reset:()=>experiment.reset(),next:()=>experiment.next(),predict:(v,w)=>experiment.predict(v,w),state:()=>experiment.state(),snapshot:()=>experiment.snapshot()},incident:{start:startIncident,act:async(choice)=>{const result=await incident.act(choice);await renderIncident();return result;},state:()=>incident.state(),snapshot:()=>incident.snapshot()},ready:()=>ready,select:i=>{meta.lesson=i;meta.route='N1-0'+(i+1);renderLesson();},selectFoundation:id=>{if(!getFoundation(id))throw Error('Leçon inconnue');meta.route=id;renderLesson();},reset:async()=>{await fresh();meta={lesson:0,route:'N0-01',foundationAnswers:{},foundationBadges:[],badges:[],actions:[],issues:[],pr:null,explanation:'',transfer:null};persist();await render();}};
+window.ATLAS={op,snapshot,restore,checksFor,foundationChecksFor,verify,report,experiment:{reset:()=>experiment.reset(),next:()=>experiment.next(),predict:(v,w)=>experiment.predict(v,w),state:()=>experiment.state(),snapshot:()=>experiment.snapshot()},incident:{start:startIncident,act:runIncidentAction,state:()=>incident.state(),snapshot:()=>incident.snapshot()},ready:()=>ready,select:i=>{meta.lesson=i;meta.route='N1-0'+(i+1);renderLesson();},selectFoundation:id=>{if(!getFoundation(id))throw Error('Leçon inconnue');meta.route=id;renderLesson();},reset:async()=>{await fresh();meta={lesson:0,route:'N0-01',foundationAnswers:{},foundationBadges:[],badges:[],actions:[],issues:[],pr:null,explanation:'',transfer:null};persist();await render();}};
 boot().catch(e=>notify('Initialisation impossible : '+e.message,true));
