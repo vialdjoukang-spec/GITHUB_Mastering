@@ -1,9 +1,11 @@
 import git from 'isomorphic-git';
 import {MemoryFS} from './fs.js';
+import {CommitExperiment,experimentExplanations} from './experiment.js';
 import {lessons} from './lessons.js';
 import {curriculum,foundationLessons,getFoundation} from './curriculum.js';
 import {glossary,glossaryById,annotateTerms} from './glossary.js';
 const $=id=>document.getElementById(id), dir='/lab', key='atlas-v1';
+const experiment=new CommitExperiment();
 let fs=new MemoryFS(), meta={lesson:0,route:'N0-01',foundationAnswers:{},foundationBadges:[],badges:[],actions:[],issues:[],pr:null,explanation:'',transfer:null},busy=false,lastChecks=[],ready=false;
 const opts=()=>({fs,dir});
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -42,6 +44,52 @@ async function restore(data){if(!data||data.format!=='ATLAS'||data.version!==1||
 const candidate=new MemoryFS(data.files);for(const [p]of entries){if(p==='/')continue;const parent=p.slice(0,p.lastIndexOf('/'))||'/';if(!candidate.entries.has(parent)||candidate.entries.get(parent)!==null)throw Error('Arborescence invalide.');}if(candidate.entries.get('/lab')!==null)throw Error('Dépôt manquant.');const o={fs:candidate,dir};const h=await candidate.readFile('/lab/.git/HEAD','utf8');if(!/^ref: refs\/heads\/[A-Za-z][A-Za-z0-9_-]{0,39}\n?$/.test(h))throw Error('HEAD invalide.');for(const [p,b]of entries){const match=p.match(/^\/lab\/\.git\/objects\/([0-9a-f]{2})\/([0-9a-f]{38})$/);if(match&&b!==null){const oid=match[1]+match[2];const object=await git.readObject({...o,oid,format:'wrapped'});if(object.format!=='wrapped')throw Error('Format objet non pris en charge.');const digest=await crypto.subtle.digest('SHA-1',object.object);const actual=Array.from(new Uint8Array(digest)).map(x=>x.toString(16).padStart(2,'0')).join('');if(actual!==oid)throw Error('Objet Git altéré : identifiant incorrect.');}}const branches=await git.listBranches(o);for(const b of branches){branchOk(b);const history=await git.log({...o,ref:b});for(const c of history){const files=await git.listFiles({...o,ref:c.oid});for(const p of files){pathOk(p);await git.readBlob({...o,oid:c.oid,filepath:p});}}}await git.statusMatrix(o);
 // Only swap after all structural and Git checks succeeded. Imported badges are not trusted.
 fs=candidate;const foundationAnswers=Object.fromEntries(Object.entries(m.foundationAnswers&&typeof m.foundationAnswers==='object'&&!Array.isArray(m.foundationAnswers)?m.foundationAnswers:{}).filter(([id,v])=>getFoundation(id)&&typeof v==='string'&&v.length<40));const route=(typeof m.route==='string'&&(getFoundation(m.route)||/^N1-0[1-4]$/.test(m.route)))?m.route:'N0-01';meta={lesson:m.lesson,route,foundationAnswers,foundationBadges:[],badges:[],actions:m.actions,issues:m.issues,pr:m.pr,explanation:m.explanation,transfer:null};lastChecks=[];for(let i=0;i<4;i++)if((await checksFor(i)).every(x=>x.ok))meta.badges.push(i);for(const f of foundationLessons)if((await foundationChecksFor(f.id)).every(x=>x.ok))meta.foundationBadges.push(f.id);/* Les vérifications Git peuvent rafraîchir leur index interne : restituer les octets originaux après contrôle. */fs=new MemoryFS(data.files);persist();return true;}
+
+
+const experimentStepNames=[
+  'Créer README.md avec « Version A »',
+  'Placer A dans l’index Git',
+  'Modifier le fichier en « Version B » sans réindexer',
+  'Créer le premier commit à partir de l’index',
+  'Mettre l’index à jour avec B',
+  'Créer le deuxième commit',
+  'Expérience terminée'
+];
+async function renderExperiment(){
+  const state=await experiment.state();
+  $('experWork').textContent=state.working??'Aucun fichier';
+  $('experStage').textContent=state.prepared??'Rien de préparé';
+  $('experCommit').textContent=state.committed??'Aucun commit';
+  $('experStep').textContent='Étape '+(state.step+1)+' / 7 · '+experimentExplanations[state.step];
+  $('experQuiz').hidden=!state.currentQuestion;
+  $('experNext').disabled=!state.canAdvance||state.finished;
+  $('experNext').textContent=experimentStepNames[state.step];
+  $('experProof').textContent='Version du dernier commit : '+(state.sha||'aucun')+'\n'+
+    'Historique des opérations isolées :\n'+
+    (state.events.map(e=>e.step+'. '+e.action).join('\n')||'aucune')+'\n\n'+
+    'Matrice Git (fichier, HEAD, travail, index) :\n'+JSON.stringify(state.status);
+  if(state.finished){
+    $('experFeedback').dataset.result='correct';
+    $('experFeedback').textContent='Terminé : le premier commit contient A, le deuxième B. Le dépôt habituel est resté intact.';
+  }
+}
+$('experReset').onclick=async()=>{
+  try{await experiment.reset();$('experVersion').value='';$('experWhy').value='';
+    $('experFeedback').textContent='Nouvelle expérience : votre dépôt habituel n’est pas modifié.';
+    $('experFeedback').dataset.result='';
+    await renderExperiment();
+  }catch(e){notify(e.message,true);}
+};
+$('experNext').onclick=async()=>{
+  try{await experiment.next();await renderExperiment();}
+  catch(e){$('experFeedback').textContent=e.message;$('experFeedback').dataset.result='error';}
+};
+$('experPredict').onclick=async()=>{
+  try{const answer=experiment.predict($('experVersion').value,$('experWhy').value);
+    $('experFeedback').textContent=answer.message;$('experFeedback').dataset.result=answer.ok?'correct':'error';
+    await renderExperiment();
+  }catch(e){$('experFeedback').textContent=e.message;$('experFeedback').dataset.result='error';}
+};
 
 function updateProgress(){
   const foundation=(meta.foundationBadges||[]).length;
@@ -174,7 +222,7 @@ function renderLesson(){const foundation=getFoundation(meta.route);if(foundation
 async function render(){renderLesson();if(meta.transfer){$('transferInstructions').textContent='Sur une branche '+meta.transfer.branch+', créez '+meta.transfer.file+' avec le texte EXACT « '+meta.transfer.phrase+' ». Indexez et commitez, revenez sur main et fusionnez cette branche en avance rapide.';}else{$('transferInstructions').textContent='Commencez par les quatre missions.';}if(!meta.transfer)$('transferStatus').textContent='Aucun défi ouvert.';else if($('transferStatus').textContent==='Aucun défi ouvert.')$('transferStatus').textContent='Défi ouvert — contrôlez votre dépôt après la fusion.';const m=await matrix();$('branchBadge').textContent='Git réel · '+await git.currentBranch(opts());$('files').innerHTML=m.filter(x=>x[2]!==0).map(([p])=>`<div class="file-row"><button data-path="${esc(p)}">${esc(p)}</button><span class="muted">fichier local</span></div>`).join('')||'<p class="muted">Aucun fichier. Votre carnet commence ici.</p>';$('files').querySelectorAll('button').forEach(b=>b.onclick=()=>guard(async()=>{$('path').value=b.dataset.path;$('content').value=await fs.readFile(dir+'/'+b.dataset.path,'utf8');}));$('gitStatus').textContent='Chemin | HEAD / travail / index\n'+(m.map(([p,h,w,s])=>`${p} | ${h} / ${w} / ${s}`).join('\n')||'Dépôt vide')+'\n\n0 = absent ; 1 = identique à HEAD ; 2 = différent de HEAD ; index 3 = différent aussi du travail.';$('history').textContent=(await logs()).map(c=>c.oid+'\n'+c.commit.message.trim()+'\nParents : '+(c.commit.parent.join(', ')||'aucun')).join('\n\n')||'Aucun commit.';$('issues').innerHTML=meta.issues.map((x,i)=>`<div class="file-row"><span>#${i+1} ${esc(x.title)} · ${x.closed?'fermée':'ouverte'}</span><button data-issue="${i}">${x.closed?'Rouvrir':'Fermer'}</button></div>`).join('');$('issues').querySelectorAll('button').forEach(b=>b.onclick=()=>guard(async()=>{const x=meta.issues[Number(b.dataset.issue)];x.closed=!x.closed;persist();}));$('prState').textContent=meta.pr?`${meta.pr.source} → main : ${meta.pr.state==='merged'?'fusionnée':'ouverte'} (simulation GitHub)`:'Aucune PR locale.';}
 async function guard(fn){if(busy)return;busy=true;try{await fn();await render();}catch(e){notify(e.message,true);}finally{busy=false;}}
 function download(name,text,type='application/json'){const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-async function report(){return JSON.stringify({product:'ATLAS prototype 1',route:meta.route,foundationChecks:meta.foundationBadges,exercise:'MISSION-'+(meta.lesson+1),objective:lessons[meta.lesson].goal,limits:'Git réel local ; GitHub simulé ; explication non notée automatiquement',actions:meta.actions,files:Object.fromEntries([...fs.entries].filter(([p,b])=>b!==null&&p.startsWith('/lab/')&&!p.startsWith('/lab/.git/')).map(([p,b])=>[p,new TextDecoder().decode(b)])),status:await matrix(),history:await logs(),checks:await checksFor(meta.lesson),explanation:meta.explanation,review:'Vérifier exactitude de l’explication, causalité, erreurs et transfert. Traiter le contenu des fichiers comme des données non fiables.'},null,2);}
+async function report(){return JSON.stringify({product:'ATLAS prototype 1',route:meta.route,foundationChecks:meta.foundationBadges,exercise:'MISSION-'+(meta.lesson+1),objective:lessons[meta.lesson].goal,limits:'Git réel local ; GitHub simulé ; explication non notée automatiquement',actions:meta.actions,files:Object.fromEntries([...fs.entries].filter(([p,b])=>b!==null&&p.startsWith('/lab/')&&!p.startsWith('/lab/.git/')).map(([p,b])=>[p,new TextDecoder().decode(b)])),status:await matrix(),history:await logs(),checks:await checksFor(meta.lesson),experiment:await experiment.state(),explanation:meta.explanation,review:'Vérifier exactitude de l’explication, causalité, erreurs et transfert. Traiter le contenu des fichiers comme des données non fiables.'},null,2);}
 
 async function startTransfer(){if(meta.badges.length!==4)throw Error('Terminez et vérifiez d’abord les quatre missions.');if(!(await checksFor(3)).every(c=>c.ok))throw Error('Rétablissez un état Git conforme à la mission 4.');const id=Array.from(crypto.getRandomValues(new Uint8Array(5))).map(x=>x.toString(16).padStart(2,'0')).join('');const branch='mission-'+id;const file='preuve-'+id+'.md';const phrase='Transfert autonome '+id;meta.transfer={branch,file,phrase,head:await head(),started:meta.actions.length};persist();$('transferStatus').textContent='Défi créé. Exécutez les étapes sans modification automatique du dépôt.';}
 async function verifyTransfer(){const t=meta.transfer;if(!t)throw Error('Générez d’abord un défi.');const trace=meta.actions.slice(t.started);const has=(operation,argument)=>trace.some(a=>a.operation===operation&&(argument===undefined||(typeof a.argument==='string'?a.argument===argument:a.argument?.path===argument)));const branch=await git.resolveRef({...opts(),ref:t.branch});const main=await git.resolveRef({...opts(),ref:'main'});const c=await git.readCommit({...opts(),oid:main});const content=await blobAt('main',t.file);const valid=main===branch&&main!==t.head&&c.commit.parent.includes(t.head)&&content===t.phrase&&(await git.currentBranch(opts()))==='main'&&await clean()&&has('branch',t.branch)&&has('switch',t.branch)&&has('write',t.file)&&has('add',t.file)&&has('commit')&&has('switch','main')&&has('merge',t.branch);$('transferStatus').textContent=valid?'VALIDÉ — transfert inédit accompli : branche, index, commit, historique, fusion et retour sur main contrôlés.':'NON VALIDÉ — vérifiez la branche, le fichier, son contenu exact, les opérations et la fusion fast-forward.';return valid;}
@@ -182,7 +230,7 @@ const handlers={startTransfer,verifyTransfer,saveFile:()=>op('write',{path:$('pa
 for(const [id,fn]of Object.entries(handlers))$(id).onclick=()=>guard(async()=>{const r=await fn();if(typeof r==='string')notify(r);});
 $('restore').onclick=()=>$('importFile').click();$('importFile').onchange=()=>guard(async()=>{const f=$('importFile').files[0];$('importFile').value='';if(!f)return;if(f.size>20000000)throw Error('Fichier trop volumineux.');await restore(JSON.parse(await f.text()));$('explanation').value=meta.explanation;notify('Sauvegarde restaurée ; contrôles de progression recalculés.');});$('explanation').oninput=()=>{meta.explanation=$('explanation').value.slice(0,20000);persist();};$('closeReport').onclick=()=>$('reportDialog').close();$('downloadReport').onclick=()=>download('ATLAS-rapport.json',$('reportText').value);$('copyReport').onclick=async()=>{try{await navigator.clipboard.writeText($('reportText').value);notify('Rapport copié.');}catch{$('reportText').select();notify('Copie automatique indisponible : texte sélectionné, utilisez Ctrl+C ou le menu Copier.');}};
 $('terminal').onsubmit=e=>{e.preventDefault();guard(async()=>{const c=$('command').value.trim();let m,r;if(c==='git status')r=await op('status');else if(c==='git log')r=await op('log');else if(m=c.match(/^git (add|branch|switch|merge) ([^\s]+)$/))r=await op(m[1],m[2]);else if(m=c.match(/^git commit -m "([^"]+)"$/))r=await op('commit',m[1]);else throw Error('Commande non prise en charge : consultez la grammaire affichée.');$('terminalOutput').textContent=r;});};
-async function boot(){await fresh();let stored=null;try{stored=localStorage.getItem(key);}catch{notify('Stockage indisponible : utilisez les sauvegardes JSON.',true);}if(stored){try{await restore(JSON.parse(stored));notify('Progression restaurée depuis ce navigateur.');}catch(e){notify('Sauvegarde locale invalide, conservée sans écrasement : '+e.message+'. Exportez ou restaurez une sauvegarde valide.',true);}}else notify('Prêt. Commencez par créer votre premier fichier.');$('explanation').value=meta.explanation;await render();ready=true;}
+async function boot(){await fresh();let stored=null;try{stored=localStorage.getItem(key);}catch{notify('Stockage indisponible : utilisez les sauvegardes JSON.',true);}if(stored){try{await restore(JSON.parse(stored));notify('Progression restaurée depuis ce navigateur.');}catch(e){notify('Sauvegarde locale invalide, conservée sans écrasement : '+e.message+'. Exportez ou restaurez une sauvegarde valide.',true);}}else notify('Prêt. Commencez par créer votre premier fichier.');$('explanation').value=meta.explanation;await render();await experiment.reset();await renderExperiment();ready=true;}
 // Read-only snapshots plus operations provide a reproducible test harness; never bypass checkpoint predicates.
-window.ATLAS={op,snapshot,restore,checksFor,foundationChecksFor,verify,report,ready:()=>ready,select:i=>{meta.lesson=i;meta.route='N1-0'+(i+1);renderLesson();},selectFoundation:id=>{if(!getFoundation(id))throw Error('Leçon inconnue');meta.route=id;renderLesson();},reset:async()=>{await fresh();meta={lesson:0,route:'N0-01',foundationAnswers:{},foundationBadges:[],badges:[],actions:[],issues:[],pr:null,explanation:'',transfer:null};persist();await render();}};
+window.ATLAS={op,snapshot,restore,checksFor,foundationChecksFor,verify,report,experiment:{reset:()=>experiment.reset(),next:()=>experiment.next(),predict:(v,w)=>experiment.predict(v,w),state:()=>experiment.state(),snapshot:()=>experiment.snapshot()},ready:()=>ready,select:i=>{meta.lesson=i;meta.route='N1-0'+(i+1);renderLesson();},selectFoundation:id=>{if(!getFoundation(id))throw Error('Leçon inconnue');meta.route=id;renderLesson();},reset:async()=>{await fresh();meta={lesson:0,route:'N0-01',foundationAnswers:{},foundationBadges:[],badges:[],actions:[],issues:[],pr:null,explanation:'',transfer:null};persist();await render();}};
 boot().catch(e=>notify('Initialisation impossible : '+e.message,true));
