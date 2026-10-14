@@ -53,6 +53,10 @@ function updateProgress(){
   $('heroTitle').textContent='Comprendre, observer, manipuler.';
 }
 function renderPathway(){
+  // Détacher l'ancien menu de son slot avant de remplacer le contenu de #pathway.
+  // Sans cela, un deuxième rendu détruit le noeud et rend l'ancien Git inaccessible.
+  const legacyNav=$('lessons');
+  if(legacyNav&&legacyNav.parentElement?.id==='legacySlot')$('pathway').insertAdjacentElement('afterend',legacyNav);
   const current=meta.route||'N0-01';
   $('pathway').innerHTML=curriculum.map(level=>{
     const active=current.startsWith(level.id+'-'),expanded=level.number<=1||active;
