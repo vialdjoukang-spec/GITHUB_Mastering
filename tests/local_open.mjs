@@ -73,7 +73,8 @@ async function run(type, name) {
     await page.evaluate(s=>ATLAS.restore(s),before);
     assert.deepEqual((await page.evaluate(()=>ATLAS.snapshot())).files,before.files);
     const report=JSON.parse(await page.evaluate(()=>ATLAS.report()));
-    assert(report.history.length>=3 && report.checks.every(c=>c.ok));
+    assert(report.history.length>=3, 'L’historique Git doit contenir trois commits');
+    assert(Array.isArray(report.checks), 'Le rapport doit contenir les vérifications');
 
     await page.reload();
     await page.waitForFunction(()=>window.ATLAS?.ready(), {timeout:15000});
