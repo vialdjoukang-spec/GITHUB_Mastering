@@ -82,6 +82,46 @@ await test(1,'P1-FONDATIONS-NEG','Réponse erronée et fichier absent ne donnent
   assert((await page.evaluate(()=>ATLAS.foundationChecksFor('N0-01'))).some(x=>!x.ok));
 });
 
+await test(1,'P1-LEXIQUE-EXHAUSTIF','Toutes les entrées affichent une définition et un mécanisme non vides',async()=>{
+  await reset();
+  await page.locator('#openGlossary').click();
+  const ids=await page.locator('#glossaryList button').evaluateAll(nodes=>nodes.map(x=>x.dataset.glossary));
+  assert(ids.length>=30,'Vocabulaire central incomplet');
+  assert.equal(new Set(ids).size,ids.length,'Doublons dans le lexique');
+  for(const id of ids){
+    await page.locator('#glossaryList [data-glossary="'+id+'"]').click();
+    assert(await page.locator('#termDialog').isVisible(),'Fenêtre absente pour '+id);
+    for(const field of ['termSimple','termWhy','termExample','termNot','termMechanism','termMistake'])
+      assert((await page.locator('#'+field).textContent()).trim().length>=25,id+' : '+field+' est vide ou insuffisant');
+    await page.locator('#termClose').click();
+    await page.locator('#openGlossary').click();
+  }
+  await page.locator('#closeGlossary').click();
+});
+await test(1,'P1-LEXIQUE-LAB','Un terme renvoie vers l’expérience indépendante sans toucher aux fichiers',async()=>{
+  await reset();const files=JSON.stringify((await snap()).files);
+  await page.evaluate(()=>ATLAS.select(1));
+  await page.locator('#lesson [data-term="index"]').first().click();
+  await page.locator('#termPrepare').click();
+  await page.waitForFunction(async()=> (await ATLAS.experiment.state()).step===0);
+  assert(await page.locator('#experNext').isFocused());
+  assert.equal(JSON.stringify((await snap()).files),files);
+});
+await test(1,'P1-LEXIQUE-TOUCH','Une fenêtre lexicale s’ouvre et se ferme au toucher',async()=>{
+  const touch=await browser.newContext({hasTouch:true,viewport:{width:390,height:844}});
+  const mobile=await touch.newPage();
+  try{
+    await mobile.goto('http://127.0.0.1:4173');
+    await mobile.waitForFunction(()=>ATLAS.ready());
+    await mobile.locator('#openGlossary').tap();
+    assert(await mobile.locator('#glossaryDialog').isVisible());
+    await mobile.locator('#glossaryList [data-glossary="fichier"]').tap();
+    assert(await mobile.locator('#termDialog').isVisible());
+    await mobile.locator('#termClose').tap();
+    assert(!await mobile.locator('#termDialog').isVisible());
+  } finally {await touch.close();}
+});
+
 await test(1,'P1-EXPERIMENT-CAUSAL','Atelier Git indépendant avec prédiction et remédiation',async()=>{
   await reset();
   const saved=JSON.stringify((await snap()).files);
