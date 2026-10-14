@@ -49,10 +49,10 @@ async function run(type, name) {
     await page.evaluate(async()=>{ATLAS.select(3);await ATLAS.verify();});
     await page.locator('#startTransfer').click();
     const instruction = await page.locator('#transferInstructions').textContent();
-    const branch=instruction.match(/branche (mission-[0-9a-f]+)/)?.[1];
-    const path=instruction.match(/créez (preuve-[0-9a-f]+\.md)/)?.[1];
-    const phrase=instruction.match(/« ([^»]+) »/)?.[1];
-    assert(branch&&path&&phrase);
+    const transfer = await page.evaluate(()=>ATLAS.snapshot().meta.transfer);
+    assert(transfer?.branch&&transfer?.file&&transfer?.phrase, 'Défi non initialisé : '+instruction);
+    const {branch,phrase,file:path} = transfer;
+    assert(instruction.includes(branch)&&instruction.includes(path)&&instruction.includes(phrase),'Instructions du défi incomplet');
     await op('branch',branch);
     await op('switch',branch);
     await op('write',{path,content:phrase});
