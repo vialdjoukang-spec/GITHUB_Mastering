@@ -48,6 +48,7 @@ async function run(type, name) {
     assert((await page.evaluate(()=>ATLAS.checksFor(3))).every(x=>x.ok));
     await page.evaluate(async()=>{ATLAS.select(3);await ATLAS.verify();});
     await page.locator('#startTransfer').click();
+    await page.waitForFunction(()=>{const t=ATLAS.snapshot().meta.transfer;const n=document.querySelector('#transferInstructions')?.textContent||'';return t&&n.includes(t.branch)&&n.includes(t.file)&&n.includes(t.phrase);});
     const instruction = await page.locator('#transferInstructions').textContent();
     const transfer = await page.evaluate(()=>ATLAS.snapshot().meta.transfer);
     assert(transfer?.branch&&transfer?.file&&transfer?.phrase, 'Défi non initialisé : '+instruction);
@@ -61,7 +62,7 @@ async function run(type, name) {
     await op('switch','main');
     await op('merge',branch);
     await page.locator('#verifyTransfer').click();
-    assert((await page.locator('#transferStatus').textContent()).includes('VALIDÉ'));
+    await page.waitForFunction(()=>document.querySelector('#transferStatus')?.textContent.includes('VALIDÉ'));
 
     const before=await page.evaluate(()=>ATLAS.snapshot());
     const downloadPromise=page.waitForEvent('download', {timeout:15000});
