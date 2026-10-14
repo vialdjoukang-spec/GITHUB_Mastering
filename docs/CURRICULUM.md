@@ -1,23 +1,22 @@
-# Parcours ATLAS
-## Prototype livré — niveau 1 : le dépôt local
-Entrée : aucune connaissance technique. Sortie : fichiers, index, deux commits reliés, branche et fusion rapide contrôlés par des objets Git.
+# ATLAS — Catalogue pédagogique et état de réalisation
 
-| Module / chapitre / leçon | Exercice | Preuve de sortie |
-|---|---|---|
-| Fondements / fichiers / premier carnet | README.md + transfert.md | deux contenus présents |
-| Git / préparation / index | indexer les deux fichiers | index identique au travail |
-| Git / historique / commit | committer sur main | blobs présents dans main, état propre |
-| Git / branches / livraison | notes.md sur notes puis main | même commit descendant, contenu et parent vérifiés |
+Source exécutable : `src/curriculum.js`. Mandat : `docs/refondation/PLAN_MAITRE.md`.
 
-Chaque leçon contient objectif, prérequis, définitions, démonstration guidée dans l’éditeur, manipulation, causalité, erreur/remédiation, question expliquée et transfert. Les questions sont réflexives, non des QCM certifiants. Badges = manipulations vérifiées dans ce périmètre ; explications à faire relire. Aucune preuve empirique d’apprentissage n’est annoncée.
+Le parcours suit : **Niveau → Module → Chapitre → Leçon → Exercice**, et chaque leçon doit suivre **Comprendre → Observer → Manipuler → Expliquer → Réussir → Réutiliser**. La navigation affiche le contenu existant séparément des étapes seulement prévues.
 
-## Programme d’extension — non implémenté
-| Niveau | Modules / chapitres prévus | Entrée | Sortie à vérifier |
+| Niveau | État actuel de la branche | Exercices disponibles | Critère de sortie complet envisagé |
 |---|---|---|---|
-| 2 — Collaboration | GitHub UI, dépôts distants, Git CLI/GitHub CLI, Issues, PR, revue, gestion de projet | niveau 1 | proposer et relire une contribution sur GitHub réel |
-| 3 — Historique avancé | diff, fusions à trois voies, conflits, rebase, reflog, récupération | branches maîtrisées | résoudre et récupérer un incident sans perte |
-| 4 — Livraison | tests, qualité, CI, GitHub Actions, versions, releases | collaboration | pipeline vérifié et publication reproductible |
-| 5 — Sécurité et maintenance | permissions, protections, dépendances, secrets, API, diagnostic | CI | corriger un incident et justifier les permissions minimales |
-| 6 — Agents et projets complexes | Codex, Claude Code, AGENTS.md/CLAUDE.md, Spec Kit, contexte et Repomix, orchestration | sécurité | déléguer des tâches isolées, relire et tester les changements |
+| 0 — Repères numériques | Partiel | 3 tâches réelles : écrire un fichier simple, classer un fichier dans un dossier, distinguer local/Git/GitHub | Créer, retrouver et expliquer où sont conservés les fichiers sans terminologie implicite |
+| 1 — Enregistrer des versions | Partiel | 4 tâches historiques : fichiers, index, commit, branche et fusion rapide | Choisir les changements à enregistrer, prédire et vérifier les objets Git |
+| 2 — Branches et collaboration | Prévu | Aucun | Contribuer et obtenir une revue utile, en distinguant les simulations des opérations distantes |
+| 3 — Terminal et récupération | Prévu | Aucun | Diagnostiquer et réparer un incident Git inédit, sans perte |
+| 4 — Automatisation et sécurité | Prévu | Aucun | Corriger une CI et publier un artefact avec privilèges minimaux |
+| 5 — Projets et agents | Prévu | Aucun | Utiliser Codex/Claude Code pour déléguer, auditer et intégrer un projet réel |
 
-Ajouter ultérieurement missions cumulatives inédites, révisions différées et parcours de remédiation personnalisés. Pas de production massive avant stabilisation et validation complète du prototype.
+**Attention** : trois premières leçons du niveau zéro ne constituent pas un niveau terminé, et quatre missions Git ne certifient pas l'expertise. Les contrôles actuels vérifient les fichiers, certaines réponses de compréhension et quelques états de Git ; les évaluations d'explication libre demandent encore une relecture.
+
+## Contrat des leçons actives
+Objectif observable, prérequis, définition à mots simples, observation guidée, manipulation réellement exécutable, mécanisme causal, erreur et remédiation, checkpoint positif/négatif, transfert non trivial, sauvegarde et rapport volontaire. Chaque terme technique nécessaire est marqué et relié à sa définition dans le lexique.
+
+## Interdits
+Les titres de cours futurs ne doivent pas devenir des faux liens. Une bonne réponse sans bon état de laboratoire ne suffit pas. Aucun écran simulé ne doit être qualifié de GitHub réel. Aucun résultat de test non exécuté ne doit devenir un PASS.
