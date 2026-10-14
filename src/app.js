@@ -234,10 +234,19 @@ function openTerm(id,origin){
   const t=glossaryById[id];if(!t)return;
   termReturnFocus=origin;
   for(const [key,value]of [['termTitle',t.label],['termSimple',t.simple],['termWhy',t.why],['termExample',t.example],['termNot',t.not],['termMechanism',t.mechanism],['termMistake',t.mistake]])$(key).textContent=value;
-  $('termPrepare').hidden=!t.lab;
-  $('termPrepare').onclick=()=>{
-    if(!t.lab)return;
+  const separateGitDemo=['index','commit','historique','arbre','HEAD','version','Git'].includes(id);
+  $('termPrepare').hidden=!t.lab&&!separateGitDemo;
+  $('termPrepare').textContent=separateGitDemo?'Ouvrir une expérience Git indépendante':'Préparer cet exemple dans le laboratoire';
+  $('termPrepare').onclick=async()=>{
     $('termDialog').close();
+    if(separateGitDemo){
+      await experiment.reset();await renderExperiment();
+      $('experimentCard').scrollIntoView({behavior:'smooth',block:'start'});
+      $('experNext').focus();
+      notify('Atelier indépendant ouvert : aucun changement dans vos fichiers personnels.');
+      return;
+    }
+    if(!t.lab)return;
     $('path').value=t.lab.path;
     $('content').value=t.lab.content;
     $('path').focus();
@@ -262,7 +271,14 @@ $('openGlossary').onclick=()=>{
 };
 $('closeGlossary').onclick=()=>$('glossaryDialog').close();
 
-function renderLesson(){const foundation=getFoundation(meta.route);if(foundation){renderFoundation(foundation);return;}const l=lessons[meta.lesson];$('lessonNumber').textContent='MISSION '+String(meta.lesson+1).padStart(2,'0')+' / 04';$('lesson').innerHTML=`<h2 id="lessonTitle">${annotateTerms(l.title)}</h2><p class="callout"><strong>Objectif mesurable</strong><br>${annotateTerms(l.goal)}</p><p><strong>Prérequis.</strong> ${annotateTerms(l.prereq)}</p><h3>Comprendre</h3><p>${annotateTerms(l.definition)}</p><p>${annotateTerms(l.explain)}</p><h3>Observer</h3><ol>${l.demo.map(x=>`<li>${annotateTerms(x)}</li>`).join('')}</ol><button id="demo">Préparer la démonstration dans l’éditeur</button><h3 style="margin-top:20px">Manipuler</h3><p>${annotateTerms(l.task)}</p><p><strong>Le mécanisme.</strong> ${annotateTerms(l.why)}</p><details><summary>Erreur fréquente et correction</summary><p>${annotateTerms(l.error)}</p></details><h3>Expliquer</h3><p>${annotateTerms(l.question)}</p><details><summary>Voir la réponse expliquée</summary><p>${annotateTerms(l.answer)}</p></details><h3>Réutiliser</h3><p>${annotateTerms(l.transfer)}</p>`;$('demo').onclick=()=>{const p=meta.lesson===3?'notes.md':'README.md';$('path').value=p;$('content').value=meta.lesson===3?'Une évolution':'# Mon carnet';$('path').focus();notify('Démonstration préparée : suivez les étapes Observer. Rien n’a été exécuté automatiquement.');};renderPathway();updateProgress();}
+function renderLesson(){const foundation=getFoundation(meta.route);if(foundation){renderFoundation(foundation);return;}const l=lessons[meta.lesson];$('lessonNumber').textContent='MISSION '+String(meta.lesson+1).padStart(2,'0')+' / 04';$('lesson').innerHTML=`<h2 id="lessonTitle">${annotateTerms(l.title)}</h2><p class="callout"><strong>Objectif mesurable</strong><br>${annotateTerms(l.goal)}</p><p><strong>Prérequis.</strong> ${annotateTerms(l.prereq)}</p><h3>Comprendre</h3><p>${annotateTerms(l.definition)}</p><p>${annotateTerms(l.explain)}</p><h3>Observer</h3><ol>${l.demo.map(x=>`<li>${annotateTerms(x)}</li>`).join('')}</ol><button id="demo">Préparer la démonstration dans l’éditeur</button><h3 style="margin-top:20px">Manipuler</h3><p>${annotateTerms(l.task)}</p><p><strong>Le mécanisme.</strong> ${annotateTerms(l.why)}</p><details><summary>Erreur fréquente et correction</summary><p>${annotateTerms(l.error)}</p></details><h3>Expliquer</h3><p>${annotateTerms(l.question)}</p><details><summary>Voir la réponse expliquée</summary><p>${annotateTerms(l.answer)}</p></details><h3>Réutiliser</h3><p>${annotateTerms(l.transfer)}</p>`;$('demo').onclick=()=>{const p=meta.lesson===3?'notes.md':'README.md';$('path').value=p;$('content').value=meta.lesson===3?'Une évolution':'# Mon carnet';$('path').focus();notify('Démonstration préparée : suivez les étapes Observer. Rien n’a été exécuté automatiquement.');};
+if(meta.lesson===1||meta.lesson===2){
+  const b=document.createElement('button');b.id='openIndependentGitDemo';b.type='button';
+  b.textContent='Observer le mécanisme dans une expérience Git indépendante';
+  b.onclick=async()=>{await experiment.reset();await renderExperiment();$('experimentCard').scrollIntoView({behavior:'smooth',block:'start'});$('experNext').focus();};
+  $('lesson').appendChild(b);
+}
+renderPathway();updateProgress();}
 async function render(){renderLesson();if(meta.transfer){$('transferInstructions').textContent='Sur une branche '+meta.transfer.branch+', créez '+meta.transfer.file+' avec le texte EXACT « '+meta.transfer.phrase+' ». Indexez et commitez, revenez sur main et fusionnez cette branche en avance rapide.';}else{$('transferInstructions').textContent='Commencez par les quatre missions.';}if(!meta.transfer)$('transferStatus').textContent='Aucun défi ouvert.';else if($('transferStatus').textContent==='Aucun défi ouvert.')$('transferStatus').textContent='Défi ouvert — contrôlez votre dépôt après la fusion.';const m=await matrix();$('branchBadge').textContent='Git réel · '+await git.currentBranch(opts());$('files').innerHTML=m.filter(x=>x[2]!==0).map(([p])=>`<div class="file-row"><button data-path="${esc(p)}">${esc(p)}</button><span class="muted">fichier local</span></div>`).join('')||'<p class="muted">Aucun fichier. Votre carnet commence ici.</p>';$('files').querySelectorAll('button').forEach(b=>b.onclick=()=>guard(async()=>{$('path').value=b.dataset.path;$('content').value=await fs.readFile(dir+'/'+b.dataset.path,'utf8');}));$('gitStatus').textContent='Chemin | HEAD / travail / index\n'+(m.map(([p,h,w,s])=>`${p} | ${h} / ${w} / ${s}`).join('\n')||'Dépôt vide')+'\n\n0 = absent ; 1 = identique à HEAD ; 2 = différent de HEAD ; index 3 = différent aussi du travail.';$('history').textContent=(await logs()).map(c=>c.oid+'\n'+c.commit.message.trim()+'\nParents : '+(c.commit.parent.join(', ')||'aucun')).join('\n\n')||'Aucun commit.';$('issues').innerHTML=meta.issues.map((x,i)=>`<div class="file-row"><span>#${i+1} ${esc(x.title)} · ${x.closed?'fermée':'ouverte'}</span><button data-issue="${i}">${x.closed?'Rouvrir':'Fermer'}</button></div>`).join('');$('issues').querySelectorAll('button').forEach(b=>b.onclick=()=>guard(async()=>{const x=meta.issues[Number(b.dataset.issue)];x.closed=!x.closed;persist();}));$('prState').textContent=meta.pr?`${meta.pr.source} → main : ${meta.pr.state==='merged'?'fusionnée':'ouverte'} (simulation GitHub)`:'Aucune PR locale.';}
 async function guard(fn){if(busy)return;busy=true;try{await fn();await render();}catch(e){notify(e.message,true);}finally{busy=false;}}
 function download(name,text,type='application/json'){const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
