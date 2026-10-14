@@ -57,9 +57,9 @@ async function run(type, name) {
     assert(!(await page.evaluate(()=>ATLAS.snapshot())).files['/lab/README.md']);
     await page.evaluate(()=>ATLAS.incident.start('updated'));
     await page.locator('#incidentRefresh').click();
-    await page.waitForFunction(async()=>{const x=await ATLAS.incident.state();return x.attempted&&x.result!==null;});
+    await page.waitForFunction(async()=>{const x=await ATLAS.incident.state();return x?.result?.accepted===true;});
     const incident=await page.evaluate(()=>ATLAS.incident.state());
-    assert(incident.result.accepted);
+    assert.equal(incident.result?.accepted,true,'Le résultat du défi doit être confirmé');
     assert.equal(incident.committed,'Version B corrigée');
     assert.deepEqual(incident.committedFiles,['README.md']);
     assert(!(await page.evaluate(()=>ATLAS.snapshot())).files['/lab/README.md']);
