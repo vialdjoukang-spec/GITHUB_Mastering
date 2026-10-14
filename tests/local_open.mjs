@@ -56,9 +56,8 @@ async function run(type, name) {
     // Aucun des gestes de l'expérience n'altère les fichiers du laboratoire principal.
     assert(!(await page.evaluate(()=>ATLAS.snapshot())).files['/lab/README.md']);
     await page.evaluate(()=>ATLAS.incident.start('updated'));
-    await page.locator('#incidentRefresh').click();
-    const incidentHandle=await page.waitForFunction(async()=>{const x=await ATLAS.incident.state();return x?.result?.accepted===true ? x : false;});
-    const incident=await incidentHandle.jsonValue();
+    const incident=await page.evaluate(()=>ATLAS.incident.act('refresh'));
+    assert.equal(incident.attempted,true,'L’opération Git doit avoir été effectuée');
     assert.equal(incident.result?.accepted,true,'Le résultat du défi doit être confirmé : '+JSON.stringify(incident));
     assert.equal(incident.committed,'Version B corrigée');
     assert.deepEqual(incident.committedFiles,['README.md']);
