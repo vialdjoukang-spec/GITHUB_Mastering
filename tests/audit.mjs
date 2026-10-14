@@ -22,6 +22,66 @@ try{const fb=await firefox.launch();await fb.close();}catch(e){blocked(1,'P1-FIR
 await page.goto('http://127.0.0.1:4173');await page.waitForFunction(()=>window.ATLAS?.ready());await ctx.setOffline(true);
 await test(1,'P1-BOOT','Initialisation et ressources intégrées',async()=>{assert.equal(errors.length,0);assert(!/<(?:script|link)[^>]+(?:src|href)=["']https?:/i.test(html.toString()));return {requests,errors};});
 await test(1,'P1-GIT','Objets Git authentiques hors ligne',async()=>{await seed();return compare('authentic',(d)=>{assert.equal(git(d,'show','HEAD:README.md'),'# Mon carnet');assert.equal(git(d,'rev-list','--count','HEAD'),'1');});});
+
+await test(1,'P1-CATALOGUE','Six niveaux et distinction du disponible/prévu',async()=>{
+  await reset();
+  assert.equal(await page.locator('#pathway .academy-level').count(),6);
+  assert.equal(await page.locator('#pathway [data-foundation]').count(),3);
+  assert.equal(await page.locator('#lessons [data-lesson]').count(),4);
+  assert((await page.locator('#pathway').textContent()).includes('Prévu'));
+  assert.equal(await page.locator('#pathway [data-foundation="N0-01"]').count(),1);
+});
+await test(1,'P1-LEXIQUE','Termes contextualisés, navigation clavier et retour focus',async()=>{
+  await reset();
+  const trigger=page.locator('#lesson [data-term="fichier"]').first();
+  assert(await trigger.count()>0);
+  await trigger.focus();await page.keyboard.press('Enter');
+  assert(await page.locator('#termDialog').isVisible());
+  assert((await page.locator('#termSimple').textContent()).includes('contenu'));
+  for(const id of ['termWhy','termExample','termNot','termMechanism','termMistake'])
+    assert((await page.locator('#'+id).textContent()).trim().length>10);
+  await page.keyboard.press('Escape');
+  assert(!await page.locator('#termDialog').isVisible());
+  assert.equal(await trigger.evaluate(el=>document.activeElement===el),true);
+  await page.locator('#openGlossary').click();
+  assert(await page.locator('#glossaryDialog').isVisible());
+  assert((await page.locator('#glossaryList button').count())>=28);
+  await page.locator('#closeGlossary').click();
+});
+await test(1,'P1-FONDATIONS','Trois leçons niveau zéro et preuves sur fichiers réels',async()=>{
+  await reset();
+  const steps=[
+    ['N0-01','bienvenue.txt','Bonjour ATLAS','local'],
+    ['N0-02','notes/mon-repere.md','# Mes repères','notes'],
+    ['N0-03','mon-projet/README.md','# Mon premier projet','local']
+  ];
+  for(const [id,path,content,answer] of steps){
+    await page.evaluate(id=>ATLAS.selectFoundation(id),id);
+    await page.locator('#foundationDemo').click();
+    assert.equal(await page.locator('#path').inputValue(),path);
+    assert.equal(await page.locator('#content').inputValue(),content);
+    await page.locator('#saveFile').click();
+    await page.locator('#foundationAnswer').selectOption(answer);
+    await page.locator('#foundationVerify').click();
+    await page.waitForFunction(id=>ATLAS.snapshot().meta.foundationBadges.includes(id),id);
+    assert((await page.evaluate(id=>ATLAS.foundationChecksFor(id),id)).every(c=>c.ok));
+  }
+  const saved=await snap();
+  assert.equal(saved.meta.foundationBadges.length,3);
+  await reset();
+  await restore(saved);
+  assert.equal((await snap()).meta.foundationBadges.length,3);
+  assert.equal((await snap()).meta.route,'N0-03');
+});
+await test(1,'P1-FONDATIONS-NEG','Réponse erronée et fichier absent ne donnent aucun badge',async()=>{
+  await reset();
+  await page.evaluate(()=>ATLAS.selectFoundation('N0-01'));
+  await page.locator('#foundationAnswer').selectOption('web');
+  await page.locator('#foundationVerify').click();
+  assert(!(await snap()).meta.foundationBadges.includes('N0-01'));
+  assert((await page.evaluate(()=>ATLAS.foundationChecksFor('N0-01'))).some(x=>!x.ok));
+});
+
 await test(2,'P2-GIT-01','Création des fichiers',async()=>{await reset();await write('README.md','# Mon carnet');return compare('write',(d,s)=>assert(s.status.includes('?? README.md')));});
 await test(2,'P2-GIT-02','Indexation',async()=>{await op('add','README.md');return compare('add',(d,s)=>{assert(s.status.includes('A  README.md'));assert.equal(git(d,'show',':README.md'),'# Mon carnet');});});
 await test(2,'P2-GIT-03','Séparation index et travail',async()=>{await write('README.md','# Mon carnet modifié');return compare('index-work',(d,s)=>{assert(s.status.includes('AM README.md'));assert.equal(git(d,'show',':README.md'),'# Mon carnet');});});
