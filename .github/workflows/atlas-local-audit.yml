@@ -4,6 +4,9 @@ on:
     branches: ["codex/atlas-local-release-20261014", "atlas-reconstruction", "codex/atlas-refondation-pedagogique-20261014"]
   pull_request:
   workflow_dispatch:
+concurrency:
+  group: atlas-audit-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: write
 jobs:
@@ -34,9 +37,14 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch origin "$GITHUB_REF_NAME"
+          if [ "$(git rev-parse HEAD)" != "$(git rev-parse FETCH_HEAD)" ]; then
+            echo 'Nouvelle version publiée sur la branche : ne pas écraser son résultat.'
+            exit 0
+          fi
           git add ATLAS.html
           if ! git diff --cached --quiet; then
-            git commit -m 'build: synchroniser ATLAS.html après validation complète'
+            git commit -m 'build: synchroniser ATLAS.html après validation complète [skip ci]'
             git push origin HEAD:${GITHUB_REF_NAME}
           fi
       - name: Record local deliverable and test evidence
