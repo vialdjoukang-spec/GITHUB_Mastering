@@ -139,6 +139,59 @@ await test(1,'P1-EXPERIMENT-REPLAY','Recommencer une expérience ne modifie ni f
   assert.equal(JSON.stringify(await snap()),before);
 });
 
+
+await test(1,'P1-INCIDENT-APPROVED','Épreuve de transfert : livrer A et préserver B sans brouillon',async()=>{
+  await reset();
+  const before=JSON.stringify(await snap());
+  await page.evaluate(()=>ATLAS.incident.start('approved'));
+  assert((await page.locator('#incidentGoal').textContent()).includes('version approuvée A'));
+  await page.locator('#incidentKeep').click();
+  await page.waitForFunction(async()=>{const x=await ATLAS.incident.state();return x.attempted&&x.result!==null;});
+  const state=await page.evaluate(()=>ATLAS.incident.state());
+  assert(state.result.accepted);
+  assert.equal(state.committed,'Version A approuvée');
+  assert.equal(state.working,'Version B corrigée');
+  assert.equal(state.prepared,'Version A approuvée');
+  assert.deepEqual(state.committedFiles,['README.md']);
+  assert((await page.locator('#incidentFeedback').textContent()).startsWith('RÉUSSITE VÉRIFIÉE'));
+  const files=Object.fromEntries(Object.entries(await page.evaluate(()=>ATLAS.incident.snapshot())).map(([p,b])=>[p.replace(/^\/incident/,'/lab'),b]));
+  const d=disk({files},'incident-approved');
+  assert.equal(git(d,'show','HEAD:README.md'),'Version A approuvée');
+  assert.equal(JSON.stringify(await snap()),before);
+});
+await test(1,'P1-INCIDENT-UPDATED','Épreuve de transfert : réindexer B et exclure un second fichier',async()=>{
+  await reset();
+  const before=JSON.stringify(await snap());
+  await page.evaluate(()=>ATLAS.incident.start('updated'));
+  await page.locator('#incidentRefresh').click();
+  await page.waitForFunction(async()=>{const x=await ATLAS.incident.state();return x.attempted&&x.result!==null;});
+  const state=await page.evaluate(()=>ATLAS.incident.state());
+  assert(state.result.accepted);
+  assert.equal(state.committed,'Version B corrigée');
+  assert.equal(state.prepared,'Version B corrigée');
+  assert.deepEqual(state.committedFiles,['README.md']);
+  const files=Object.fromEntries(Object.entries(await page.evaluate(()=>ATLAS.incident.snapshot())).map(([p,b])=>[p.replace(/^\/incident/,'/lab'),b]));
+  const d=disk({files},'incident-updated');
+  assert.equal(git(d,'show','HEAD:README.md'),'Version B corrigée');
+  assert.equal(git(d,'ls-tree','-r','--name-only','HEAD'),'README.md');
+  const report=JSON.parse(await page.evaluate(()=>ATLAS.report()));
+  assert(report.incident.result.accepted);
+  assert.equal(JSON.stringify(await snap()),before);
+});
+await test(1,'P1-INCIDENT-NEGATIVE','Mauvaise procédure : refus de valider deux objectifs opposés',async()=>{
+  for(const [mode,choice,wrong]of [['approved','refresh','Version B corrigée'],['updated','keep','Version A approuvée']]){
+    await page.evaluate(mode=>ATLAS.incident.start(mode),mode);
+    await page.locator(choice==='keep'?'#incidentKeep':'#incidentRefresh').click();
+    await page.waitForFunction(async()=>{const x=await ATLAS.incident.state();return x.attempted&&x.result!==null;});
+    const state=await page.evaluate(()=>ATLAS.incident.state());
+    assert.equal(state.result.accepted,false);
+    assert.equal(state.committed,wrong);
+    assert((await page.locator('#incidentFeedback').textContent()).startsWith('NON VALIDÉ'));
+    assert(await page.locator('#incidentKeep').isDisabled());
+    assert(await page.locator('#incidentRefresh').isDisabled());
+  }
+});
+
 await test(2,'P2-GIT-01','Création des fichiers',async()=>{await reset();await write('README.md','# Mon carnet');return compare('write',(d,s)=>assert(s.status.includes('?? README.md')));});
 await test(2,'P2-GIT-02','Indexation',async()=>{await op('add','README.md');return compare('add',(d,s)=>{assert(s.status.includes('A  README.md'));assert.equal(git(d,'show',':README.md'),'# Mon carnet');});});
 await test(2,'P2-GIT-03','Séparation index et travail',async()=>{await write('README.md','# Mon carnet modifié');return compare('index-work',(d,s)=>{assert(s.status.includes('AM README.md'));assert.equal(git(d,'show',':README.md'),'# Mon carnet');});});
