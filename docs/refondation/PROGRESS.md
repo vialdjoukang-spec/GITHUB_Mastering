@@ -61,3 +61,11 @@ Pas de fusion automatique dans `main`. Aucun cours prévu n'est interactif, et a
 - **Fichier de préversion** : `ATLAS.html` construit et synchronisé sur la branche par commit [c5d5ea8](https://github.com/vialdjoukang-spec/GITHUB_Mastering/commit/c5d5ea8c03bfad28754f60572eaf1cf233fd580c).
 - **Audit médical ou diplôme professionnel** : sans objet ; la compétence experte en GitHub n'est pas certifiée par ces tests fonctionnels.
 - **Reste ouvert** : revue humaine de toutes les définitions, essais tactiles ciblés, isolation des ateliers, vraie profondeur didactique, contenus des niveaux 2 à 5, validation utilisateur.
+
+## Reçu de validation complémentaire — 14 octobre 2026
+
+- **CI sur push** : [38572334658](https://github.com/vialdjoukang-spec/GITHUB_Mastering/actions/runs/38572334658), succès ; **CI de PR** : [38572342850](https://github.com/vialdjoukang-spec/GITHUB_Mastering/actions/runs/38572342850), succès.
+- **Audit automatique** : 106 PASS ; ouverture directe `file://` réussie dans Chromium 154 et Firefox 157 ; construction autonome sans dépendance réseau ; synchronisation de `ATLAS.html` exécutée avec succès par le workflow de push.
+- **Défi de diagnostic** : test local corrigé pour attendre directement l'action Git asynchrone et vérifier son commit plutôt que reconsulter une valeur d'attente Playwright. Commit source `bfe58c43`.
+- **Périmètre** : les tests valident les fonctionnalités implémentées, non la complétude du cursus. Les niveaux N2 à N5 restent prévus ; PR #3 reste en brouillon et `main` inchangée.
+- **Travaux suivants** : réconciliation du catalogue avec la carte des compétences, critères de sortie N0/N1, revue lexicale humaine, scénarios d'évaluation réellement inédits, outils GitHub distants autorisés.
