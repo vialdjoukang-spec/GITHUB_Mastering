@@ -28,6 +28,18 @@ async function run(type, name) {
     assert(!await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth), 'Débordement mobile');
 
     const op=(n,a)=>page.evaluate(([n,a])=>ATLAS.op(n,a),[n,a]);
+    assert.equal(await page.locator('#pathway .academy-level').count(),6);
+    assert.equal(await page.locator('#pathway [data-foundation]').count(),3);
+    await page.locator('#openGlossary').click();
+    assert(await page.locator('#glossaryDialog').isVisible());
+    await page.locator('#closeGlossary').click();
+    await page.evaluate(()=>ATLAS.selectFoundation('N0-01'));
+    await page.locator('#foundationDemo').click();
+    await page.locator('#saveFile').click();
+    await page.locator('#foundationAnswer').selectOption('local');
+    await page.locator('#foundationVerify').click();
+    await page.waitForFunction(()=>ATLAS.snapshot().meta.foundationBadges.includes('N0-01'));
+    assert((await page.evaluate(()=>ATLAS.foundationChecksFor('N0-01'))).every(x=>x.ok));
     await page.evaluate(()=>ATLAS.reset());
     await op('write',{path:'README.md',content:'# Mon carnet'});
     await op('write',{path:'transfert.md',content:'Autre contexte'});
@@ -83,7 +95,7 @@ async function run(type, name) {
     assert(width);
     assert.deepEqual(exceptions,[],'Exceptions JavaScript');
     assert(requests.every(u=>u.startsWith('file://')),'Aucune requête réseau');
-    const status={name,version:browser.version(),file_url:url,sha256,theme,git:true,transfer:true,restore:true,report:true,no_network:true,errors:exceptions,passed:true};
+    const status={name,version:browser.version(),file_url:url,sha256,theme,levels:true,glossary:true,foundation:true,git:true,transfer:true,restore:true,report:true,no_network:true,errors:exceptions,passed:true};
     results.push(status);
     console.log('PASS file://',name,browser.version());
   } catch(e) {
