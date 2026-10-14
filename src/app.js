@@ -6,6 +6,7 @@ import {curriculum,foundationLessons,getFoundation} from './curriculum.js';
 import {glossary,glossaryById,annotateTerms} from './glossary.js';
 const $=id=>document.getElementById(id), dir='/lab', key='atlas-v1';
 const experiment=new CommitExperiment();
+let experimentBusy=false;
 const incident=new IncidentChallenge();
 let incidentCounter=0;
 let fs=new MemoryFS(), meta={lesson:0,route:'N0-01',foundationAnswers:{},foundationBadges:[],badges:[],actions:[],issues:[],pr:null,explanation:'',transfer:null},busy=false,lastChecks=[],ready=false;
@@ -64,7 +65,7 @@ async function renderExperiment(){
   $('experCommit').textContent=state.committed??'Aucun commit';
   $('experStep').textContent='Étape '+(state.step+1)+' / 7 · '+experimentExplanations[state.step];
   $('experQuiz').hidden=!state.currentQuestion;
-  $('experNext').disabled=!state.canAdvance||state.finished;
+  $('experNext').disabled=experimentBusy||!state.canAdvance||state.finished;
   $('experNext').textContent=experimentStepNames[state.step];
   $('experProof').textContent='Version du dernier commit : '+(state.sha||'aucun')+'\n'+
     'Historique des opérations isolées :\n'+
@@ -83,8 +84,11 @@ $('experReset').onclick=async()=>{
   }catch(e){notify(e.message,true);}
 };
 $('experNext').onclick=async()=>{
-  try{await experiment.next();await renderExperiment();}
+  if(experimentBusy)return;
+  experimentBusy=true;$('experNext').disabled=true;
+  try{await experiment.next();}
   catch(e){$('experFeedback').textContent=e.message;$('experFeedback').dataset.result='error';}
+  finally{experimentBusy=false;await renderExperiment();}
 };
 $('experPredict').onclick=async()=>{
   try{const answer=experiment.predict($('experVersion').value,$('experWhy').value);
