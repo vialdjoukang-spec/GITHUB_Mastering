@@ -37,7 +37,7 @@ if(index===1){for(const [p,t] of [['README.md','Mon carnet'],['transfert.md','Au
 if(index===2){add('Branche courante : main',(await git.currentBranch(opts()))==='main');for(const [p,t] of [['README.md','Mon carnet'],['transfert.md','Autre contexte']])add(p+' dans le commit main',(await blobAt('main',p))?.includes(t));add('Aucune modification restante',await clean());}
 if(index===3){let main=null,notes=null,parentContent=null;try{main=await git.resolveRef({...opts(),ref:'main'});notes=await git.resolveRef({...opts(),ref:'notes'});const c=await git.readCommit({...opts(),oid:main});if(c.commit.parent[0])parentContent=await blobAt(c.commit.parent[0],'README.md');}catch{}add('main et notes pointent sur la même évolution',main&&main===notes);add('notes.md contient Une évolution dans le commit',(await blobAt('main','notes.md'))?.includes('Une évolution'));add('Un commit précédent contient le carnet',parentContent?.includes('Mon carnet'));add('Retour sur main et état propre',(await git.currentBranch(opts()))==='main'&&await clean());}
 return checks;}
-async function verify(){lastChecks=await checksFor(meta.lesson);const pass=lastChecks.every(c=>c.ok);if(pass&&!meta.badges.includes(meta.lesson))meta.badges.push(meta.lesson);persist();$('checks').textContent=lastChecks.map(c=>(c.ok?'PASS':'À CORRIGER')+' — '+c.label).join('\n')+'\n'+(pass?'Manipulation vérifiée. Explication à faire relire ; aucune certification d’expertise.':lessons[meta.lesson].error);return pass;}
+async function verify(){const foundation=getFoundation(meta.route);if(foundation){lastChecks=await foundationChecksFor(foundation.id);const pass=lastChecks.every(c=>c.ok);meta.foundationBadges=meta.foundationBadges||[];if(pass&&!meta.foundationBadges.includes(foundation.id))meta.foundationBadges.push(foundation.id);persist();$('checks').textContent=lastChecks.map(c=>(c.ok?'PASS':'À CORRIGER')+' — '+c.label).join('\n')+'\n'+(pass?'Preuve locale vérifiée ; l’explication libre exige une relecture.':foundation.error);return pass;}lastChecks=await checksFor(meta.lesson);const pass=lastChecks.every(c=>c.ok);if(pass&&!meta.badges.includes(meta.lesson))meta.badges.push(meta.lesson);persist();$('checks').textContent=lastChecks.map(c=>(c.ok?'PASS':'À CORRIGER')+' — '+c.label).join('\n')+'\n'+(pass?'Manipulation vérifiée. Explication à faire relire ; aucune certification d’expertise.':lessons[meta.lesson].error);return pass;}
 async function restore(data){if(!data||data.format!=='ATLAS'||data.version!==1||!data.files||typeof data.files!=='object'||Array.isArray(data.files))throw Error('Sauvegarde ATLAS version 1 attendue.');const entries=Object.entries(data.files);if(entries.length>3000)throw Error('Trop de fichiers.');let total=0;for(const [p,b]of entries){if(p!=='/'&&p!=='/lab'&&!/^\/lab\/(?:[A-Za-z0-9_.-]+\/)*[A-Za-z0-9_.-]+$/.test(p)||p.split('/').some(x=>x==='..'||x==='.'||x==='__proto__'||x==='constructor'||x==='prototype'))throw Error('Chemin de sauvegarde interdit.');if(b!==null&&(!Array.isArray(b)||b.some(x=>!Number.isInteger(x)||x<0||x>255)))throw Error('Octets invalides.');total+=b?.length||0;}if(total>5000000)throw Error('Sauvegarde trop volumineuse.');const m=data.meta;if(!m||!Number.isInteger(m.lesson)||m.lesson<0||m.lesson>3||!Array.isArray(m.badges)||m.badges.some(x=>!Number.isInteger(x)||x<0||x>3)||!Array.isArray(m.actions)||m.actions.length>500||!Array.isArray(m.issues)||m.issues.length>100||m.issues.some(x=>!x||typeof x.title!=='string'||x.title.length>200||typeof x.closed!=='boolean')||typeof m.explanation!=='string'||m.explanation.length>20000||m.pr!==null&&(!m.pr||typeof m.pr.source!=='string'||!['open','merged'].includes(m.pr.state)))throw Error('Métadonnées invalides.');if(m.pr)branchOk(m.pr.source);
 const candidate=new MemoryFS(data.files);for(const [p]of entries){if(p==='/')continue;const parent=p.slice(0,p.lastIndexOf('/'))||'/';if(!candidate.entries.has(parent)||candidate.entries.get(parent)!==null)throw Error('Arborescence invalide.');}if(candidate.entries.get('/lab')!==null)throw Error('Dépôt manquant.');const o={fs:candidate,dir};const h=await candidate.readFile('/lab/.git/HEAD','utf8');if(!/^ref: refs\/heads\/[A-Za-z][A-Za-z0-9_-]{0,39}\n?$/.test(h))throw Error('HEAD invalide.');for(const [p,b]of entries){const match=p.match(/^\/lab\/\.git\/objects\/([0-9a-f]{2})\/([0-9a-f]{38})$/);if(match&&b!==null){const oid=match[1]+match[2];const object=await git.readObject({...o,oid,format:'wrapped'});if(object.format!=='wrapped')throw Error('Format objet non pris en charge.');const digest=await crypto.subtle.digest('SHA-1',object.object);const actual=Array.from(new Uint8Array(digest)).map(x=>x.toString(16).padStart(2,'0')).join('');if(actual!==oid)throw Error('Objet Git altéré : identifiant incorrect.');}}const branches=await git.listBranches(o);for(const b of branches){branchOk(b);const history=await git.log({...o,ref:b});for(const c of history){const files=await git.listFiles({...o,ref:c.oid});for(const p of files){pathOk(p);await git.readBlob({...o,oid:c.oid,filepath:p});}}}await git.statusMatrix(o);
 // Only swap after all structural and Git checks succeeded. Imported badges are not trusted.
@@ -93,10 +93,13 @@ async function foundationChecksFor(id){
   if(!lesson)throw Error('Leçon inconnue.');
   let content=null;
   try{content=await fs.readFile(dir+'/'+lesson.path,'utf8');}catch{}
-  return [
+  const checks=[
     {label:'Fichier '+lesson.path+' et contenu exact',ok:content===lesson.expected},
     {label:'Réponse de compréhension de la leçon',ok:meta.foundationAnswers?.[id]===lesson.quiz.correct}
   ];
+  if(id==='N0-02')checks.unshift({label:'Prérequis : première leçon vérifiée',ok:(meta.foundationBadges||[]).includes('N0-01')});
+  if(id==='N0-03')checks.unshift({label:'Prérequis : dossier et chemin vérifiés',ok:(meta.foundationBadges||[]).includes('N0-02')});
+  return checks;
 }
 function renderFoundation(l){
   $('lessonNumber').textContent='NIVEAU 0 · '+l.id;
@@ -112,6 +115,7 @@ function renderFoundation(l){
    +'<h3>5. Réussir : question + preuve réelle</h3><p>'+annotateTerms(l.quiz.prompt)+'</p>'
    +'<label for="foundationAnswer">Choisissez la réponse</label><select id="foundationAnswer"><option value="">— Choisir —</option>'+l.quiz.options.map(x=>'<option value="'+esc(x.value)+'"'+(meta.foundationAnswers?.[l.id]===x.value?' selected':'')+'>'+esc(x.label)+'</option>').join('')+'</select>'
    +'<button id="foundationVerify" class="primary" type="button">Vérifier ma compréhension et mon fichier</button>'
+   +'<p id="foundationResult" role="status" class="feedback">'+((meta.foundationBadges||[]).includes(l.id)?'✓ Épreuve accomplie avec preuve locale.':'Épreuve en attente : aucun succès n’est attribué sans le bon fichier et la bonne réponse.')+'</p>'
    +'<details><summary>Pourquoi cette réponse ?</summary><p>'+annotateTerms(l.answer)+'</p></details>'
    +'<h3>6. Réutiliser</h3><p>'+annotateTerms(l.transfer)+'</p>';
   $('foundationDemo').onclick=()=>{
@@ -127,13 +131,8 @@ function renderFoundation(l){
     persist();
   };
   $('foundationVerify').onclick=()=>guard(async()=>{
-    const cs=await foundationChecksFor(l.id);
-    const passed=cs.every(x=>x.ok);
-    meta.foundationBadges=meta.foundationBadges||[];
-    if(passed&&!meta.foundationBadges.includes(l.id))meta.foundationBadges.push(l.id);
-    persist();
-    $('checks').textContent=cs.map(c=>(c.ok?'PASS':'À CORRIGER')+' — '+c.label).join('\n')+'\n'+(passed?'Preuve locale vérifiée. L’explication libre nécessite encore une relecture.':l.error);
-    notify(passed?'Manipulation et compréhension contrôlées.': 'Contrôle non validé : consultez le détail ci-dessous.',!passed);
+    const passed=await verify();
+    notify(passed?'Manipulation et compréhension contrôlées.':'Contrôle non validé : consultez les résultats détaillés.',!passed);
   });
   renderPathway();
   updateProgress();
