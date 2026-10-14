@@ -49,6 +49,7 @@ async function run(type, name) {
     await page.locator('#experWhy').selectOption('index');
     await page.locator('#experPredict').click();
     await page.locator('#experNext').click();
+    await page.waitForFunction(async()=> (await ATLAS.experiment.state()).committed==='Version A');
     experiment=await page.evaluate(()=>ATLAS.experiment.state());
     assert.equal(experiment.committed,'Version A');
     assert.equal(experiment.working,'Version B');
