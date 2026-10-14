@@ -40,6 +40,20 @@ async function run(type, name) {
     await page.locator('#foundationVerify').click();
     await page.waitForFunction(()=>ATLAS.snapshot().meta.foundationBadges.includes('N0-01'));
     assert((await page.evaluate(()=>ATLAS.foundationChecksFor('N0-01'))).every(x=>x.ok));
+    await page.locator('#experReset').click();
+    for(let i=0;i<3;i++)await page.locator('#experNext').click();
+    let experiment=await page.evaluate(()=>ATLAS.experiment.state());
+    assert.equal(experiment.working,'Version B');
+    assert.equal(experiment.prepared,'Version A');
+    await page.locator('#experVersion').selectOption('a');
+    await page.locator('#experWhy').selectOption('index');
+    await page.locator('#experPredict').click();
+    await page.locator('#experNext').click();
+    experiment=await page.evaluate(()=>ATLAS.experiment.state());
+    assert.equal(experiment.committed,'Version A');
+    assert.equal(experiment.working,'Version B');
+    // Aucun des gestes de l'expérience n'altère les fichiers du laboratoire principal.
+    assert(!(await page.evaluate(()=>ATLAS.snapshot())).files['/lab/README.md']);
     await page.evaluate(()=>ATLAS.reset());
     await op('write',{path:'README.md',content:'# Mon carnet'});
     await op('write',{path:'transfert.md',content:'Autre contexte'});
