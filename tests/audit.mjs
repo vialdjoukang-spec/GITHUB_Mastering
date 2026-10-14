@@ -214,6 +214,7 @@ await test(1,'P1-INCIDENT-UPDATED','Épreuve de transfert : réindexer B et excl
   await page.evaluate(()=>ATLAS.incident.start('updated'));
   await page.locator('#incidentRefresh').click();
   await page.waitForFunction(async()=>{const x=await ATLAS.incident.state();return x.attempted&&x.result!==null;});
+  await page.waitForFunction(()=>document.querySelector('#incidentFeedback')?.textContent.startsWith('RÉUSSITE VÉRIFIÉE'));
   const state=await page.evaluate(()=>ATLAS.incident.state());
   assert(state.result.accepted);
   assert.equal(state.committed,'Version B corrigée');
@@ -232,6 +233,7 @@ await test(1,'P1-INCIDENT-NEGATIVE','Mauvaise procédure : refus de valider deux
     await page.evaluate(mode=>ATLAS.incident.start(mode),mode);
     await page.locator(choice==='keep'?'#incidentKeep':'#incidentRefresh').click();
     await page.waitForFunction(async()=>{const x=await ATLAS.incident.state();return x.attempted&&x.result!==null;});
+    await page.waitForFunction(()=>document.querySelector('#incidentFeedback')?.textContent.startsWith('NON VALIDÉ'));
     const state=await page.evaluate(()=>ATLAS.incident.state());
     assert.equal(state.result.accepted,false);
     assert.equal(state.committed,wrong);
