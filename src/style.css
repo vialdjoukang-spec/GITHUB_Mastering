@@ -36,3 +36,19 @@ aside .academy-link.active,aside #lessons .academy-link.active{border:2px solid 
 #foundationAnswer{margin:5px 0 12px;background:#fff;border:1px solid #67849a}
 #foundationVerify{display:block;margin:10px 0 18px}
 @media(max-width:650px){.academy-level>summary strong{font-size:12px}aside #lessons{display:block!important}.term-dialog{padding:17px}.glossary-list{grid-template-columns:1fr 1fr}.term-dialog .modal-head h2{font-size:19px}}
+
+/* Version indexée et fichier modifié : trois états visibles sur tout écran clair. */
+.exper-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:17px 0}
+.exper-state{background:#f4f9fd;border:1px solid #aabfce;border-radius:10px;padding:13px;min-width:0}
+.exper-state h3{font-size:13px;line-height:1.4;margin:0 0 10px;color:#27465a}
+.exper-state p{background:#fff;border:1px solid #ccdae5;border-radius:7px;padding:12px 9px;margin:0 0 7px;font:700 17px/1.5 ui-monospace,Consolas,monospace;color:#155f43;overflow-wrap:anywhere;min-height:54px}
+.exper-state small{font-size:12px}
+.exper-step{background:#e8f5ee;border-left:4px solid #187b54;padding:14px;border-radius:7px;color:#184b34;font-weight:600}
+#experQuiz{background:#f5faff;border:1px solid #9dbdd2;border-radius:9px;padding:13px;margin:12px 0}
+#experQuiz label{margin-top:8px}
+#experPredict{margin:12px 0 0;border-color:#196747}
+#experFeedback:not(:empty){border-left:3px solid #507996;padding:8px 12px;background:#f3f8fc}
+#experFeedback[data-result="error"]{color:#8e2633;border-color:#ad3544;background:#fff3f5}
+#experFeedback[data-result="correct"]{color:#195d3e;border-color:#278456;background:#edf8f0}
+#experProof{max-height:210px}
+@media(max-width:720px){.exper-grid{grid-template-columns:1fr}.exper-state{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:5px;align-items:start}.exper-state h3{grid-column:1/-1}.exper-state p{margin-bottom:0}.exper-state small{align-self:center}}
