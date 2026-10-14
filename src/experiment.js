@@ -63,3 +63,57 @@ export const experimentExplanations=[
   'Vous avez actualisé l’index : il contient maintenant B, comme le fichier de travail.',
   'Deuxième commit créé. L’historique contient deux versions successives ; le dépôt est à jour.'
 ];
+
+/**
+ * Épreuve de transfert : même état Git initial, exigences opposées.
+ * Une vraie opération Git est exécutée et son résultat vérifié dans un dépôt isolé.
+ * Ne jamais valider seulement le bouton choisi.
+ */
+export class IncidentChallenge {
+  constructor(){this.fs=null;this.mode=null;this.attempted=false;this.result=null;this.events=[];}
+  get opts(){return {fs:this.fs,dir:'/incident'};}
+  async start(mode){
+    if(!['approved','updated'].includes(mode))throw Error('Scénario invalide.');
+    this.fs=new MemoryFS();await this.fs.mkdir('/incident');
+    await git.init({...this.opts,defaultBranch:'main'});
+    await this.fs.writeFile('/incident/README.md','Version A approuvée');
+    await git.add({...this.opts,filepath:'README.md'});
+    await this.fs.writeFile('/incident/README.md','Version B corrigée');
+    await this.fs.writeFile('/incident/brouillon.txt','Ne pas publier');
+    this.mode=mode;this.attempted=false;this.result=null;this.events=['README A indexé','README modifié en B','Brouillon non indexé'];
+    return this.state();
+  }
+  async act(choice){
+    if(!this.fs||!this.mode)throw Error('Ouvrez une mission avant de choisir une action.');
+    if(this.attempted)throw Error('Mission déjà exécutée : recommencez pour retenter avec le même objectif.');
+    if(!['keep','refresh'].includes(choice))throw Error('Action inconnue.');
+    this.attempted=true;
+    if(choice==='refresh'){
+      await git.add({...this.opts,filepath:'README.md'});
+      this.events.push('Actualiser index avec version B');
+    }
+    await git.commit({...this.opts,message:'Livraison contrôlée',author:{name:'ATLAS',email:'atelier@atlas.invalid'}});
+    this.events.push('Créer commit');
+    const state=await this.state();
+    const expected=this.mode==='approved'?'Version A approuvée':'Version B corrigée';
+    const cleanReadme=state.committed===state.working;
+    const accepted=state.committed===expected&&!state.committedFiles.includes('brouillon.txt')&&
+      (this.mode==='approved'?!cleanReadme:cleanReadme);
+    this.result={accepted,choice,expected,committed:state.committed,keepDraftUnstaged:!state.committedFiles.includes('brouillon.txt')};
+    return this.state();
+  }
+  async state(){
+    if(!this.fs)return {mode:null,attempted:false,result:null};
+    let committed=null,sha=null,committedFiles=[];
+    try{sha=await git.resolveRef({...this.opts,ref:'HEAD'});
+      const r=await git.readBlob({...this.opts,oid:sha,filepath:'README.md'});
+      committed=new TextDecoder().decode(r.blob);
+      committedFiles=await git.listFiles({...this.opts,ref:'HEAD'});
+    }catch{}
+    return {mode:this.mode,attempted:this.attempted,result:this.result,sha,
+      working:await this.fs.readFile('/incident/README.md','utf8'),
+      prepared:this.attempted?(this.result?.choice==='refresh'?'Version B corrigée':'Version A approuvée'):'Version A approuvée',
+      committed,committedFiles,status:await git.statusMatrix(this.opts),events:this.events.slice()};
+  }
+  snapshot(){return this.fs?.snapshot()||{};}
+}
